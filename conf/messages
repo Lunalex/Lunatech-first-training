@@ -1,0 +1,42 @@
+#navigation
+nav.welcome.title=Welcome to Hiquéa
+nav.index.backTo.button=Back to index
+nav.product.backTo.button=Back to product
+nav.productsList.title=Catalogue
+nav.productsList.backTo.button=Back to catalogue
+nav.productsList.goTo.button=See all products
+nav.api.goTo.button=API
+nav.database.goTo.button=DB
+
+#product fields names
+product.ean=European Article Number (EAN)
+product.name=Product name
+product.description=Product description
+product.picture=Product photo
+
+#product forms
+productForm.create.title=Create a new product
+productForm.create.button=New product
+productForm.edit.title=Edit product "{0}" (ean = "{1}")
+productForm.edit.button=Edit product
+
+#form
+form.save.button=Save
+form.edit.button=Edit
+
+#error
+error.required=mandatory field
+error.ean.already.exists=Another product already have this EAN
+error.ean.length=The EAN must be exactly 8 characters long
+error.ean.contains.charSequence=The EAN cannot contains the characters sequence 'AAA'
+error.name.length=The name must have at least 3 characters
+error.picture.size=The picture file you chose is too big
+
+#alert
+alert.createProduct.success={0} has been successfully added to the products''list
+alert.updateProduct.success={0} has been successfully updated
+
+#modal
+modal.title.productDelete=Delete this product?
+modal.yes=Yes
+modal.no=No

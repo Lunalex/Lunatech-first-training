@@ -1,0 +1,196 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    display: flex;
+    min-height: 130vh;
+    flex-direction: column;
+}
+
+.navbar{
+    height: 70px;
+    border-width: 0 1px 4px 2px;
+    border-color: #533f03;
+    border-style: solid;
+    box-shadow: -10px 5px 5px #312502;
+}
+
+.main-title{
+    letter-spacing: 8px;
+}
+
+.container{
+    margin-top: 70px;
+    flex: 1;
+    background-image: url("/assets/images/background-furniture-portrait.jpg");
+    background-size: 100% auto;
+    background-position: center -300px;
+    background-repeat: no-repeat;
+    background-color: #F0EEEE;
+}
+
+.index-btn{
+    font-size: 20px;
+    box-shadow: -10px 5px 5px #533f03;
+}
+
+.page-404{
+    height: fit-content;
+}
+
+.page-404 img{
+    height: 30vh;
+    border-radius: 105px;
+}
+
+.page-404 .text-404{
+    font-size: 30px;
+    color: white;
+    text-shadow: 3px 3px 3px #1c7430;
+}
+
+.btn-404 .btn{
+    box-shadow: 6px 6px 7px #1c7430;
+}
+
+.card-list, .page-404{
+    box-shadow: -7px 10px 7px #0a0a0a;
+    background: rgba(0,0,0,0.8);
+}
+
+.card-list .card-header{
+    background-color: #f2f0f0;
+    box-shadow: -1px -1px 1px #f2f0f0;
+}
+
+.card-header{
+    letter-spacing: 3px;
+}
+
+.card-sub-title{
+    color: #17a2b8;
+    text-shadow: 0.3px 0.1px whitesmoke;
+    font-size: 15px;
+    letter-spacing: 2px;
+    font-style: italic;
+    font-weight: bold;
+    transform: translateY(45%);
+}
+
+.card-sub-title.title-api{
+    color: #FFB72D;
+}
+
+
+
+a.card{
+    color: black;
+    font-style: normal;
+    text-decoration: none;
+}
+
+.product-card, .form-card{
+    background-color: white;
+}
+
+.product-card{
+    border-radius: 7px;
+    box-shadow: -1px -1px 2px white;
+}
+
+.product-card .card-header{
+    border-radius: 7px 7px 0 0;
+}
+
+.product-card .imgDiv{
+    box-shadow: -1px 2px 15px black;
+    border-radius: 10px;
+    max-height: 250px;
+    max-width: 360px;
+    padding: 0;
+    background-color: #E6E6E6;
+    overflow: hidden;
+}
+
+.product-card img{
+    width: 100%;
+}
+
+.card-ean{
+    font-size: 11px;
+    font-style: italic;
+}
+
+#product-delete{
+    font-size: 25px;
+    font-weight: bold;
+    color: #ad3434;
+    text-shadow: 1px 2px 1px #ad3434;
+    position: absolute;
+    top: -2px;
+    right: 5px;
+}
+
+#product-delete:hover{
+    text-decoration: none;
+    text-shadow: 1px 2px 1px #b55353;
+    color: #b55353;
+}
+
+.btn-shadow{
+    box-shadow: -10px 5px 5px #312502;
+}
+
+footer{
+    padding-right: 10%;
+    background-color: #312502;
+    opacity: 0.5;
+    font-size: 18px;
+    color: ghostwhite;
+}
+
+/* --- ADMIN --- */
+
+.admin-background{
+    box-shadow: -7px 10px 7px #0a0a0a;
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+}
+
+.toph{
+    position: relative;
+    box-shadow: -1px 2px 15px black;
+    border-radius: 10px;
+    overflow: hidden;
+    padding: 0;
+}
+
+.toph-image{
+    width: 100%;
+}
+
+.toph-text{
+    color: yellow;
+    font-size: 50px;
+    position: absolute;
+    width: 100%;
+    top: 48%;
+    left: 64%;
+}
+
+.admin-label{
+    color: yellow;
+    font-size: 15px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.admin-background .form-control.admin-form-description{
+    width: 317%;
+}
+
+.admin-background .form-control.admin-form-name{
+    width: 168%;
+}
+
+.admin-background .form-control.admin-form-picture{
+    width: 89%;
+}

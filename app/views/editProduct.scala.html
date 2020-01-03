@@ -1,0 +1,73 @@
+@(formToEdit: play.data.Form[Product], productToEdit: models.Product, request: Http.Request, messages: play.i18n.Messages)
+@import helper._
+
+@main(messages("productForm.edit.title", productToEdit.getName(), productToEdit.getEan())){
+
+    <br>
+    @if(request.flash().contains("redirectFromNew")){
+        <div class="row justify-content-center">
+            <div class="col-10 alert alert-info"><b>EAN @request.flash().getOptional("redirectFromNew").get()</b> already exists. You have been redirected to the product edit page.
+                <br>To come back and create a new product with a different EAN <a href="@routes.ProductController.prepareNew()">click here</a>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-primary btn-shadow" href="@routes.ProductController.showProduct(productToEdit.getEan)">@messages("nav.product.backTo.button")</a>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h2>@messages("productForm.edit.title", productToEdit.getName, productToEdit.getEan)</h2>
+                </div>
+                <div class="card-body">
+                    @if(formToEdit.hasErrors){
+                        @for(errorMsg <- formToEdit.errors()){
+                            <div class="alert alert-primary" role="alert">
+                                <b>@messages("product."+errorMsg.key):</b> @errorMsg.format(messages)
+                            </div>
+                        }
+                    }
+                    @form(action = routes.ProductController.saveEditProduct(productToEdit.getEan), Symbol("enctype") -> "multipart/form-data") {
+                        @CSRF.formField
+                        @inputText(formToEdit("ean"),
+                            Symbol("_class") -> "form-group", Symbol("class") -> "form-control",
+                            Symbol("_label") -> messages("product.ean"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false,
+                            Symbol("readonly") -> "readonly"
+                        )
+                        @inputText(formToEdit("name"),
+                            Symbol("_class") -> "form-group", Symbol("class") -> "form-control",
+                            Symbol("_label") -> messages("product.name"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        @inputText(formToEdit("description"),
+                            Symbol("_class") -> "form-group", Symbol("class") -> "form-control",
+                            Symbol("_label") -> messages("product.description"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        @inputFile(formToEdit("pictureFile"),
+                            Symbol("_label") -> messages("product.picture"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        <div class="row justify-content-center">
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-info btn-block btn-lg">@messages("form.save.button")</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+    
+            </div>
+    
+        </div>
+    </div>
+
+}

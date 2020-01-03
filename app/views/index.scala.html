@@ -1,0 +1,12 @@
+@(messages: play.i18n.Messages)
+
+
+    @main(messages("nav.welcome.title")) {
+
+        <div class="row justify-content-center">
+            <a href="@routes.ProductController.showProductsDefault()" class="col-4 mt-5 btn btn-success index-btn">@messages("nav.productsList.goTo.button")</a>
+        </div>
+        <div class="row justify-content-center mt-2">
+            <a href="@routes.AdminController.showAdmin()" class="col-2 mt-5 btn btn-outline-warning index-btn">admin</a>
+        </div>
+    }

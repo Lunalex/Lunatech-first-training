@@ -1,0 +1,18 @@
+@()
+
+@main("Ooops! 404 not Found!"){
+    <div class="row justify-content-center mt-5 page-404">
+        <div class="col my-5">
+            <div class="row justify-content-center my-5">
+                <img src="@routes.Assets.versioned("/images/peterParkerSorry.jpeg")" alt="Peter Parker crying meme saying 'Sorry'"/>
+            </div>
+            <div class="row justify-content-center my-5 text-404">
+                <div class="col-10 text-center">The page you are looking for doesn't exist</div>
+            </div>
+            <div class="row justify-content-center my-5 btn-404">
+                <a href="@routes.ProductController.showProductsDefault()" class="col-8 text-center mt-3 mb-2 btn btn-success btn-shadow">Wanna go back to the catalogue?</a>
+            </div>
+        </div>
+    </div>
+
+}

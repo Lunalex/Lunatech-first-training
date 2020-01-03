@@ -1,0 +1,40 @@
+#navigation
+nav.welcome.title=Bienvenue chez Hiquéa
+nav.index.backTo.button=Retour à l''index
+nav.product.backTo.button=Retour au produit
+nav.productsList.title=Catalogue de produits
+nav.productsList.backTo.button=Retour à la liste des produits
+nav.productsList.goTo.button=Voir tous les produits
+nav.api.goTo.button=API
+
+
+#product fields
+product.ean=Numéro d''article unique (EAN)
+product.name=Nom du produit
+product.description=Description du produit
+product.picture=Photo du produit
+
+#product forms
+productForm.create.title=Créer un nouveau produit
+productForm.create.button=Nouveau produit
+productForm.edit.title=Éditer le produit "{0}" (ean = "{1}")
+productForm.edit.button=Editer le produit
+
+#form
+form.save.button=Enregistrer
+form.edit.button=Éditer
+
+#error
+error.required=champ obligatoire
+error.ean.length=doit faire exactement 8 caractères
+error.ean.contains.charSequence=ne peut contenir la chaine de caractères ''AAA''
+error.name.length=doit faire au moins 3 caractères
+
+#alert
+alert.createProduct.success={0} a été ajouté avec succès à la liste des produits
+alert.updateProduct.success={0} a été modifié avec succès
+
+#modal
+modal.title.productDelete=Supprimer ce produit ?
+modal.yes=Oui
+modal.no=Non

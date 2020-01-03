@@ -1,0 +1,54 @@
+@(products: java.util.List[models.Product], pictureUpdate: actors.PictureUpdateAnswerMessage)
+@import actors.PictureUpdateAnswerMessage;
+@import actors.PictureUpdateAnswerMessage.NO_NEW_PICTURE;
+@import actors.PictureUpdateAnswerMessage.PICTURE_UPDATED;
+@import actors.PictureUpdateAnswerMessage.PICTURE_NOT_UPDATED;
+
+@main("Products filtered") {
+
+    <div class="row justify-content-between">
+        <div class="col mt-4">
+            <a class="btn btn-outline-primary btn-shadow" href="@routes.ProductController.showProductsDefault()">
+                Back to full list</a>
+            <a class="btn btn-outline-warning btn-shadow ml-3" href="@routes.AdminController.showAdmin()">
+                Back to admin</a>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col card card-list">
+            <div class="row card-header">
+                <h2 class="col text-center">Results</h2>
+            </div>
+            <div class="row justify-content-around card-body">
+                @if(products.isEmpty) {
+                    <div class="col-10 alert alert-info mt-3">Sorry no product corresponding to your request has been found</div>
+                } else {
+                    @if(pictureUpdate.equals(PICTURE_UPDATED)) {
+                        <div class="col-10 alert alert-success mt-5"><b>SUCCESS:</b> all pictures have been updated</div>
+                    }
+                    @if(pictureUpdate.equals(PICTURE_NOT_UPDATED)) {
+                        <div class="col-10 alert alert-danger mt-5"><b>ERROR:</b> image file max size = 880Ko</div>
+                    }
+                    @if(pictureUpdate.equals(NO_NEW_PICTURE)) {
+                        <div class="col-10 alert alert-warning mt-5"><b>ERROR:</b> no image file was attached to your request</div>
+                    }
+                }
+
+                @for(p <- products) {
+                    <a href="@routes.ProductController.showProduct(p.getEan)" class="col-xs-12 col-md-5 m-4 card product-card">
+                        <div class="row justify-content-center card-header">
+                            <h3 class="col-10 text-center">@p.getName</h3>
+                        </div>
+                        <div class="row justify-content-center card-body">
+                            <div class="col-12 imgDiv">
+                                <img src="@routes.ProductController.showProductImage(p.getEan)" alt="picture of @p.getName"/>
+                            </div>
+                            <div class="col-10 text-center mt-3">@p.getDescription</div>
+                            <div class="col-12 text-left mt-3 p-1 card-ean">EAN ref. @p.getEan</div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+}

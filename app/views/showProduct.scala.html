@@ -1,0 +1,54 @@
+@(request: Http.Request, messages: play.i18n.Messages, myProduct:Product)
+
+@main(myProduct.getName() + " " + myProduct.getDescription()){
+
+    <!-- Modal -->
+    <div class="modal fade" id="product-delete-modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">@messages("modal.title.productDelete")</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body row justify-content-around">
+              <div class="col-5">
+                  <button type="button" class="btn btn-danger btn-block" data-dismiss="modal">@messages("modal.no")</button>
+              </div>
+              <div class="col-5">
+                  <button type="button" class="btn btn-success btn-block delete-product-btn"
+                  data-url="@routes.ProductController.deleteProduct(myProduct.getEan())" data-redirect-url="@routes.ProductController.showProductsDefault()" data-token="@helper.CSRF.getToken.value"
+                  >@messages("modal.yes")</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <end>Modal -->
+    <div class="row justify-content-between">
+        <div class="col mt-5">
+            <a class="btn btn-primary btn-shadow" href="@routes.ProductController.showProductsDefault()">@messages("nav.productsList.backTo.button")</a>
+        </div>
+        <div class="col-3 mt-5">
+            <a class="btn btn-info btn-block btn-shadow" href="@routes.ProductController.prepareEdit(myProduct.getEan())">@messages("productForm.edit.button")</a>
+        </div>
+    </div>
+
+    <div class="row justify-content-center mt-3 p-4">
+        <div class="col card product-card">
+            <a id="product-delete" href="@routes.ProductController.deleteProduct(myProduct.getEan())" data-toggle="modal" data-target="#product-delete-modal">ⓧ</a>
+            <div class="row justify-content-center card-header">
+                <h3 class="col-10 text-center">@myProduct.getName()</h3>
+            </div>
+            <div class="row justify-content-center card-body">
+                <div class="col-12">
+                    <img src="@routes.ProductController.showProductImage(myProduct.getEan())" alt="picture of @myProduct.getName()"/>
+                </div>
+                <div class="col-10 text-center mt-3">@myProduct.getDescription()</div>
+                <div class="col-12 text-left mt-3 p-1 card-ean">EAN ref. @myProduct.getEan()</div>
+            </div>
+        </div>
+    </div>
+
+}

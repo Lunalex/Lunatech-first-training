@@ -1,0 +1,80 @@
+@(productListFromJson: java.util.List[models.Product], pageIndex: Int, totalNumberOfPages: Int)
+
+    @main("API products") {
+
+        @* --- site navigation --- *@
+        <div class="row justify-content-start">
+            <div class="col mt-4">
+                <a class="btn btn-primary btn-shadow" href="@routes.HomeController.index()">Back to index</a>
+                <a class="btn btn-outline-warning btn-shadow ml-3" href="@routes.AdminController.showAdmin()">
+                    Back to admin</a>
+            </div>
+        </div>
+
+        @* --- card --- *@
+        <div class="row mt-5">
+            <div class="col card card-list">
+
+                @* -- card header -- *@
+                <div class="row card-header">
+                    <h2 class="col text-center">API Products</h2>
+                </div>
+
+                @* -- page navigation & API btn -- *@
+                <div class="row mt-3 justify-content-around">
+                    <div class="col-3 my-2 row justify-content-between">
+                    @if(pageIndex != 0) {
+                        <div class="col-5">
+                            <a class="btn btn-block btn-outline-warning btn-shadow text-center" href="@routes.ApiController.showProductsApi(0)">
+                                FIRST</a>
+                        </div>
+                        <div class="col-5">
+                            <a class="btn btn-block btn-outline-warning btn-shadow text-center" href="@routes.ApiController.showProductsApi(pageIndex - 1)">
+                                <<<</a>
+                        </div>
+                    }
+                    </div>
+                    <div class="col-2 my-2 row justify-content-center">
+                        <div class="col-8">
+                            <form action="@routes.ProductController.showProducts(pageIndex)">
+                                <input onchange="this.form.submit()" type="checkbox" checked data-toggle="toggle" data-onstyle="outline-warning" data-offstyle="outline-info" data-on="API" data-off="DB">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-3 my-2 row justify-content-between">
+                    @if(pageIndex != (totalNumberOfPages - 1)) {
+                        <div class="col-5">
+                            <a class="btn btn-block btn-outline-warning btn-shadow text-center" href="@routes.ApiController.showProductsApi(pageIndex + 1)">
+                                >>></a>
+                        </div>
+                        <div class="col-5">
+                            <a class="btn btn-block btn-outline-warning btn-shadow text-center" href="@routes.ApiController.showProductsApi(totalNumberOfPages - 1)">
+                                LAST</a>
+                        </div>
+                    }
+                    </div>
+                </div>
+
+                @* -- page number -- *@
+                <div class="row mt-1 justify-content-center">
+                    <div class="col-3 text-center card-sub-title title-api">page @(pageIndex + 1) of @totalNumberOfPages</div>
+                </div>
+
+                @* -- card body -- *@
+                <div class="row justify-content-around card-body">
+                @for(p <- productListFromJson) {
+                    <div class="col-xs-12 col-md-5 m-4 card product-card">
+                        <div class="row justify-content-center card-header">
+                            <h3 class="col-10 text-center">@p.getName</h3>
+                        </div>
+                        <div class="row justify-content-center card-body">
+                            <div class="col-10 text-center mt-3">@p.getDescription</div>
+                            <div class="col-12 text-left mt-3 p-1 card-ean">EAN ref. @p.getEan</div>
+                        </div>
+                    </div>
+                }
+                </div>
+
+            </div>
+        </div>
+    }

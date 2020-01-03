@@ -1,0 +1,72 @@
+@(myForm: play.data.Form[Product], request: Http.Request, messages: play.i18n.Messages)
+@import helper._
+
+@main(messages("productForm.create.title")){
+
+    <br>
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-primary btn-shadow" href="@routes.ProductController.showProductsDefault()">@messages("nav.productsList.backTo.button")</a>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col">
+            <div class="card form-card">
+                <div class="card-header">
+                    <h2>@messages("productForm.create.title")</h2>
+                </div>
+                <div class="card-body">
+                    @if(myForm.hasErrors){
+                        @for(errorMsg <- myForm.errors()){
+                            @if(errorMsg.key().equals("eanAlreadyUsed")){
+                                <div class="alert alert-primary" role="alert">
+                                    <b>@messages(errorMsg.key):</b>
+                                    change current ean to another value than @errorMsg.message
+                                    or <a href="@routes.ProductController.prepareEdit(errorMsg.message)">edit the existing product</a>
+                                </div>
+                            } else {
+                                <div class="alert alert-primary" role="alert">
+                                    <b>@messages("product."+errorMsg.key):</b> @messages(errorMsg.format(messages))
+                                </div>
+                            }
+                        }
+                    }
+                    @form(action = routes.ProductController.saveProduct(), Symbol("enctype") -> "multipart/form-data") {
+                        @CSRF.formField
+                        @inputText(myForm("ean"),
+                            Symbol("_class") -> "form-group", Symbol("class") -> "form-control",
+                            Symbol("_label") -> messages("product.ean"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        @inputText(myForm("name"),
+                            Symbol("_class") -> "form-group", Symbol("class") -> "form-control",
+                            Symbol("_label") -> messages("product.name"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        @inputText(myForm("description"),
+                            Symbol("_class") -> "form-group", Symbol("class") -> "form-control",
+                            Symbol("_label") -> messages("product.description"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        @inputFile(myForm("pictureFile"),
+                            Symbol("_label") -> messages("product.picture"),
+                            Symbol("_showConstraints") -> false,
+                            Symbol("_showErrors") -> false
+                        )
+                        <div class="row justify-content-center">
+                            <div class="col-6">
+                                <button type="submit" class="btn btn-success btn-block btn-lg">@messages("form.save.button")</button>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}

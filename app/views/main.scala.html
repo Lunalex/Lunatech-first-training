@@ -1,0 +1,34 @@
+@*
+ * This template is called from the `index` template. This template
+ * handles the rendering of the page header and body tags. It takes
+ * two arguments, a `String` for the title of the page and an `Html`
+ * object to insert into the body of the page.
+ *@
+@(title: String)(content: Html)
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="@routes.Assets.versioned("css/bootstrap.min.css")">
+    <link rel="stylesheet" href="@routes.Assets.versioned("css/bootstrap4-toggle.min.css")">
+    <link rel="stylesheet" href="@routes.Assets.versioned("css/style.css")">
+</head>
+
+<body>
+    <div class="navbar navbar-nav fixed-top navbar-light bg-light">
+        <h1 class="main-title">HIQUÉA</h1>
+    </div>
+    <div class="container">
+        @content
+    </div>
+    <footer class="text-right">© 2019 - HIQUÉA</footer>
+    <script src="@routes.Assets.versioned("js/jquery-3.4.1.js")"></script>
+    <script src="@routes.Assets.versioned("js/popper.min.js")"></script>
+    <script src="@routes.Assets.versioned("js/bootstrap.min.js")"></script>
+    <script src="@routes.Assets.versioned("js/bootstrap4-toggle.min.js")"></script>
+    <script src="@routes.Assets.versioned("js/script.js")"></script>
+</body>
+</html>

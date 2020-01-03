@@ -1,0 +1,97 @@
+@(currentPage: io.ebean.PagedList[models.Product])(implicit request: Http.Request, messages: play.i18n.Messages)
+
+    @main(messages("nav.productsList.title")) {
+
+        @* --- flash messages --- *@
+        @if(request.flash().contains("productCreated")) {
+            <div class="alert alert-success mt-5">@messages("alert.createProduct.success", request.flash().getOptional("productCreated").get())</div>
+        }
+        @if(request.flash().contains("productEdited")) {
+            <div class="alert alert-success mt-5">@messages("alert.updateProduct.success", request.flash().getOptional("productEdited").get())</div>
+        }
+        @if(request.flash().contains("productDeleted")) {
+            <div class="alert alert-success mt-5">@messages("alert.deleteProduct.success", request.flash().getOptional("productDeleted").get())</div>
+        }
+
+        @* --- site navigation --- *@
+        <div class="row justify-content-between">
+            <div class="col mt-4">
+                <a class="btn btn-primary btn-shadow" href="@routes.HomeController.index()">@messages("nav.index.backTo.button")</a>
+                <a class="btn btn-outline-warning btn-shadow ml-3" href="@routes.AdminController.showAdmin()">Back to admin</a>
+            </div>
+            <div class="col-4 mt-4">
+                <a class="btn btn-success btn-block btn-shadow" href="@routes.ProductController.prepareNew()">@messages("productForm.create.button")</a>
+            </div>
+        </div>
+
+        @* --- card --- *@
+        <div class="row mt-5">
+            <div class="col card card-list">
+
+                @* -- card header -- *@
+                <div class="row card-header">
+                    <h2 class="col text-center">@messages("nav.productsList.title")</h2>
+                </div>
+
+                @* -- page navigation & API btn -- *@
+                <div class="row mt-3 justify-content-around">
+                    <div class="col-3 my-2 row justify-content-between">
+                        @if(currentPage.getPageIndex != 0) {
+                            <div class="col-5">
+                                <a class="btn btn-block btn-outline-info btn-shadow text-center" href="@routes.ProductController.showProducts(0)">FIRST</a>
+                            </div>
+                        }
+                        @if(currentPage.hasPrev){
+                            <div class="col-5">
+                                <a class="btn btn-block btn-outline-info btn-shadow text-center" href="@routes.ProductController.showProducts(currentPage.getPageIndex - 1)"><<<</a>
+                            </div>
+                        }
+                    </div>
+                    <div class="col-2 my-2 row justify-content-center">
+                        <div class="col-8">
+                            <form action="@routes.ApiController.showProductsApi(currentPage.getPageIndex)">
+                                <input onchange="this.form.submit()" type="checkbox" data-toggle="toggle" data-onstyle="outline-warning" data-offstyle="outline-info" data-on="@messages("nav.api.goTo.button")" data-off="@messages("nav.database.goTo.button")">
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-3 my-2 row justify-content-between">
+                        @if(currentPage.hasNext) {
+                            <div class="col-5">
+                                <a class="btn btn-block btn-outline-info btn-shadow text-center" href="@routes.ProductController.showProducts(currentPage.getPageIndex + 1)">>>></a>
+                            </div>
+                        }
+                        @if(currentPage.getPageIndex != (currentPage.getTotalPageCount - 1)){
+                            <div class="col-5">
+                                <a class="btn btn-block btn-outline-info btn-shadow text-center" href="@routes.ProductController.showProducts(currentPage.getTotalPageCount - 1)">LAST</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                @* -- page number -- *@
+                <div class="row mt-1 justify-content-center">
+                    <div class="col-3 text-center card-sub-title">page @(currentPage.getPageIndex+1) of @currentPage.getTotalPageCount</div>
+                </div>
+
+
+                @* -- card body -- *@
+                <div class="row justify-content-around card-body">
+                    @for(product <- currentPage.getList){
+                        <a href="@routes.ProductController.showProduct(product.getEan)" class="col-xs-12 col-md-5 m-4 card product-card">
+                            <div class="row justify-content-center card-header">
+                                <h3 class="col-10 text-center">@product.getName</h3>
+                            </div>
+                            <div class="row justify-content-center card-body">
+                                <div class="col-12 imgDiv">
+                                    <img src="@routes.ProductController.showProductImage(product.getEan())" alt="picture of @product.getName"/>
+                                </div>
+                                <div class="col-10 text-center mt-3">@product.getDescription</div>
+                                <div class="col-12 text-left mt-3 p-1 card-ean">EAN ref. @product.getEan</div>
+                            </div>
+                        </a>
+                    }
+                </div>
+
+            </div>
+        </div>
+    }

@@ -5,10 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import play.libs.ws.*;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.concurrent.CompletionStage;
 
-@Singleton
 public class ApiService implements WSBodyReadables, WSBodyWritables {
 
     private final WSClient ws;

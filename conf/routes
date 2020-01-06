@@ -43,10 +43,12 @@ GET     /api/fetch/light                controllers.ApiController.getLightProduc
 GET     /api/fetch/light-indirect       controllers.ApiController.getLightProductsApiIndirectMethod
 
 # Elasticsearch-basic-fetchAll
-GET     /es                             controllers.ApiController.showRawJsonElastic
-GET     /es/formatted                   controllers.ApiController.showProductsElasticJsonFormatted
-GET     /es/products                    controllers.ApiController.showProductsElasticDefault
-GET     /es/products/page/:pageIndex    controllers.ApiController.showProductsElastic(pageIndex: Int)
+GET     /es                             controllers.ElasticsearchController.showFullRawJsonElastic
+GET     /es/formatted                   controllers.ElasticsearchController.showFullFormattedJsonElastic
+GET     /es/products                    controllers.ElasticsearchController.showAllProductsElasticDefault
+GET     /es/products/page/:pageIndex    controllers.ElasticsearchController.showAllProductsElastic(pageIndex: Int)
+GET     /es/name/:name                  controllers.ElasticsearchController.findProductsByName(name: String)
+GET     /es/index/:ean                  controllers.ElasticsearchController.indexOneProductByEan(ean: String)
 
 #Elasticsearch-REST-API
 #GET     /search-exact-name/:name        controllers.ProductController.searchExactName(request: Request, name: String)

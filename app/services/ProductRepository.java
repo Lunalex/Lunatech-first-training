@@ -15,7 +15,7 @@ import java.util.Optional;
 public class ProductRepository {
 
     private final EbeanServer ebeanServer;
-    public final static int PAGE_SIZE = 5;
+    public final static int PAGE_SIZE = 20;
 
     @Inject
     public ProductRepository(EbeanConfig ebeanConfig){

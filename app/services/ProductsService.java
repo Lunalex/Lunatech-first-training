@@ -15,6 +15,9 @@ import static controllers.ProductController.getBytesFromFile;
 
 public class ProductsService {
 
+    public ProductsService(){
+
+    }
 
     public Http.MultipartFormData.FilePart<Files.TemporaryFile> getPictureFromRequest(Http.Request request) {
         Http.MultipartFormData<Files.TemporaryFile> formData = request.body().asMultipartFormData();

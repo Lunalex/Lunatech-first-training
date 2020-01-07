@@ -3,7 +3,6 @@ package services;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jdk.nashorn.internal.parser.JSONParser;
 import play.libs.ws.*;
 
 import javax.inject.Inject;
@@ -11,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionStage;
 
-import static services.EsField.*;
+import static services.EsProductField.*;
 import static services.EsJsonBodyParam.*;
 
 public class ElasticsearchService implements WSBodyReadables, WSBodyWritables {
@@ -37,6 +36,10 @@ public class ElasticsearchService implements WSBodyReadables, WSBodyWritables {
     }
 
     public JsonNode formatJsonEsResponse(JsonNode rawJsonEs){
+        System.out.println("=================================");
+        System.out.println("RAW JSON ES RESPONSE");
+        System.out.println(rawJsonEs);
+        System.out.println("=================================");
         if(rawJsonEs.size() > 0){
             JsonNode jsonEsHits = rawJsonEs.get(HITS.getParam()).get(HITS.getParam()).deepCopy();
             for(JsonNode productNode : jsonEsHits){

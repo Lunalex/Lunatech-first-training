@@ -1,6 +1,6 @@
 package services;
 
-public enum EsField
+public enum EsProductField
 {
     NONE(""),
     EAN("ean"),
@@ -9,7 +9,7 @@ public enum EsField
 
     private String field;
 
-    EsField(String field){
+    EsProductField(String field){
         this.field = field;
     }
 

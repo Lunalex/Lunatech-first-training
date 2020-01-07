@@ -34,9 +34,9 @@
                         <div class="col-12 my-2 text-center esErrors">
                             <i>no
                                 @if(esForm.error("ean").isPresent){<b>ean</b>}
-                                @if(esForm.errors().size() > 1 && esForm.error("ean").isPresent){ or }
+                                @if(esForm.error("ean").isPresent && (esForm.error("name").isPresent || esForm.errors().size() > 1)){ or }
                                 @if(esForm.error("name").isPresent){<b>name</b>}
-                                @if(esForm.errors().size() > 1 && esForm.error("description").isPresent){ or }
+                                @if(esForm.error("name").isPresent && esForm.error("description").isPresent){ or }
                                 @if(esForm.error("description").isPresent){<b>description</b>}
                                  corresponding to your search has been found
                             </i>

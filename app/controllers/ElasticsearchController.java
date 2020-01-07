@@ -1,11 +1,11 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.Product;
 import play.data.Form;
 import play.data.FormFactory;
-import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -14,9 +14,10 @@ import services.*;
 import javax.inject.Inject;
 import java.util.*;
 
-import static services.EsField.*;
-import static services.EsIndex.PRODUCT;
+import static services.EsJsonBodyField.*;
+import static services.EsProductField.*;
 import static services.EsJsonBodyParam.*;
+import static services.EsIndex.PRODUCT;
 
 public class ElasticsearchController extends Controller {
 
@@ -24,6 +25,8 @@ public class ElasticsearchController extends Controller {
     private final JsonService jsonService;
     private final ProductRepository repo;
     private final FormFactory formFactory;
+    // TODO: const below not used yet = will be useful for the pagination if implemented
+    //private static final int ES_PAGE_SIZE = 5;
 
     @Inject
     public ElasticsearchController(ElasticsearchService es, JsonService jsonService, ProductRepository repo, FormFactory formFactory) {
@@ -59,11 +62,6 @@ public class ElasticsearchController extends Controller {
 
     public Result indexAllDbProducts(){
         List<Product> productList = repo.getAllProductsAsList();
-        System.out.println("productList");
-        System.out.println(productList);
-        System.out.println("--------------------------");
-        System.out.println("----------------------------------");
-        System.out.println("---------------------------------------");
         StringBuilder ndJsonBodyBuilder = new StringBuilder();
 
         for(Product product : productList) {
@@ -81,14 +79,16 @@ public class ElasticsearchController extends Controller {
             ndJsonBodyBuilder.append(jsonCreate1).append(System.getProperty("line.separator")).append(jsonProduct1).append(System.getProperty("line.separator"));
         }
         String ndJson = ndJsonBodyBuilder.toString();
-        System.out.println("ndJsonBodyBuilder");
-        System.out.println(ndJsonBodyBuilder);
+        System.out.println("ndJson");
+        System.out.println(ndJson);
         System.out.println("--------------------------");
         System.out.println("----------------------------------");
         System.out.println("---------------------------------------");
+
         JsonNode jsonResponse = es.makeElasticsearchBulkIndexing(PRODUCT, ndJson);
         System.out.println("jsonResponse");
         System.out.println(jsonResponse);
+
         return ok(jsonResponse);
         //return ok(elasticsearch.formatJsonEsResponse(jsonResponse));
         //return redirect(routes.ElasticsearchController.showAllProductsElasticDefault());
@@ -98,45 +98,69 @@ public class ElasticsearchController extends Controller {
 
     public Result searchProducts(String search, Http.Request request) {
         Form<String> esForm = formFactory.form(String.class).bindFromRequest(request);
-        List<Product> esProductsFinal = new ArrayList<>();
-
-        // search by ean
-        List<Product> esProductsEan = this.findProductsByField(search, EAN);
-        if(!esProductsEan.isEmpty())            esProductsFinal.addAll(esProductsEan);
-        else                                    esForm = esForm.withError(new ValidationError("ean", "no ean corresponding to your search has been found"));
-
-        // search by name
-        List<Product> esProductsName = this.findProductsByField(search, NAME);
-        if(!esProductsName.isEmpty())           esProductsFinal.addAll(esProductsName);
-        else                                    esForm = esForm.withError(new ValidationError("name", "no name corresponding to your search has been found"));
-
-        // search by description
-        List<Product> esProductsDescription = this.findProductsByField(search, DESCRIPTION);
-        if(!esProductsDescription.isEmpty())     esProductsFinal.addAll(esProductsDescription);
-        else                                    esForm = esForm.withError(new ValidationError("description", "no description corresponding to your search has been found"));
+        List<Product> esProductsFinal = this.getProductsListFromSearch(search);
 
         System.out.println("esProductsFinal");
         System.out.println(esProductsFinal);
         return ok(views.html.elasticsearch.render(esForm, esProductsFinal, request));
     }
 
-
-
-    private List<Product> findProductsByField(String search, EsField fieldSearched){
+    private List<Product> getProductsListFromSearch(String search){
         ObjectNode jsonBody = es.getMapper().createObjectNode();
-        ObjectNode childNode1 = es.getMapper().createObjectNode();
-        ObjectNode childNode2 = es.getMapper().createObjectNode();
 
-        childNode2.put(fieldSearched.getField(), search);
-        childNode1.set(MATCH.getParam(), childNode2);
-        jsonBody.set(QUERY.getParam(), childNode1);
+        // TODO: for pagination add "size" and "from" parameters (at the same level than QUERY and SORT)
+
+        // sort
+        ArrayNode sortNode = es.getMapper().createArrayNode();
+        sortNode.add(SCORE.getField());
+        jsonBody.set(SORT.getParam(), sortNode);
+
+        // search
+        ObjectNode searchNode = this.buildSearchNode(search);
+        jsonBody.set(QUERY.getParam(), searchNode);
 
         JsonNode jsonResponse = es.makeElasticsearchQuery(HttpMethod.GET, PRODUCT, EsRequestType.SEARCH, new HashMap<>(), jsonBody);
-        System.out.println("jsonResponse findBy "+fieldSearched.getField());
+        System.out.println("= jsonResponse all 3 queries at the same time =");
         System.out.println(jsonResponse);
         System.out.println("-----------------------");
         return jsonService.deserializeJsonToListAsFull(es.formatJsonEsResponse(jsonResponse));
     }
+
+    private ObjectNode buildSearchNode(String search) {
+        ArrayNode shouldNode = es.getMapper().createArrayNode();
+        // ean
+        ObjectNode eanNode = this.buildFieldNode(search, EAN);
+        shouldNode.add(eanNode);
+        // name
+        ObjectNode nameNode = this.buildFieldNode(search, NAME);
+        shouldNode.add(nameNode);
+        // description
+        ObjectNode descriptionNode = this.buildFieldNode(search, DESCRIPTION);
+        shouldNode.add(descriptionNode);
+        // searchNode
+        ObjectNode searchNode = es.getMapper().createObjectNode();
+        ObjectNode boolNode = es.getMapper().createObjectNode();
+        boolNode.set(SHOULD.getParam(),shouldNode);
+        searchNode.set(BOOL.getParam(), boolNode);
+        return searchNode;
+    }
+
+    private ObjectNode buildFieldNode(String search, EsProductField productField) {
+        // fieldParametersNode
+        ObjectNode fieldParametersNode = es.getMapper().createObjectNode();
+        fieldParametersNode.put(QUERY.getParam(), search);
+        fieldParametersNode.put(FUZZINESS.getParam(), AUTO.getField());
+        // productFieldNode
+        ObjectNode productFieldNode = es.getMapper().createObjectNode();
+        productFieldNode.set(productField.getField(), fieldParametersNode);
+        // matchNode
+        ObjectNode matchNode = es.getMapper().createObjectNode();
+        matchNode.set(MATCH.getParam(), productFieldNode);
+
+        return matchNode;
+    }
+
+
 
     /*-- delete --*/
     public Result deleteAllProductsFromEs(){

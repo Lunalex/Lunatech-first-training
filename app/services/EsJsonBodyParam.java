@@ -3,18 +3,25 @@ package services;
 public enum EsJsonBodyParam
 {
     NONE(""),
-    QUERY("query"),
-    MATCH("match"),
-    MULTI_MATCH("multi_match"),
-    MATCH_ALL("match_all"),
-    CREATE("create"),
-    UPDATE("update"),
-    DOC("doc"),
-    ID("_id"),
-    TYPE("type"),
     ACKNOWLEDGED("acknowledged"),
+    BOOL("bool"),
+    CREATE("create"),
+    ID("_id"),
+    FROM("from"),
+    FUZZINESS("fuzziness"),
     HITS("hits"),
-    SOURCE("_source");
+    MATCH("match"),
+    MATCH_ALL("match_all"),
+    MATCH_BOOL_PREFIX("match_phrase_prefix"),
+    MATCH_PHRASE_PREFIX("match_phrase_prefix"),
+    MULTI_MATCH("multi_match"),
+    QUERY("query"),
+    SHOULD("should"),
+    SIZE("size"),
+    SORT("sort"),
+    SOURCE("_source"),
+    TYPE("type"),
+    UPDATE("update");
 
     private String param;
 

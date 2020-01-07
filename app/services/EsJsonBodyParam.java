@@ -9,7 +9,12 @@ public enum EsJsonBodyParam
     MATCH_ALL("match_all"),
     CREATE("create"),
     UPDATE("update"),
-    DOC("doc");
+    DOC("doc"),
+    ID("_id"),
+    TYPE("type"),
+    ACKNOWLEDGED("acknowledged"),
+    HITS("hits"),
+    SOURCE("_source");
 
     private String param;
 

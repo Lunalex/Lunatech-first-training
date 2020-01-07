@@ -1,0 +1,75 @@
+@(esForm: play.data.Form[Product], esProducts: java.util.List[models.Product])(implicit request: Http.Request)
+@import helper._
+
+@main("Elasticsearch"){
+    <br>
+    <div class="row">
+        <div class="col">
+            <a class="btn btn-outline-primary btn-shadow" href="@routes.HomeController.index()">Back to index</a>
+        </div>
+    </div>
+    <br>
+    <div class="row justify-content-center">
+
+        <div class="col-11 admin-background">
+
+            @*-- SEARCH BAR --*@
+            <div class="row justify-content-around my-5">
+            @form(action = routes.ElasticsearchController.findProductsByName(), Symbol("class") -> "form-inline col-12 row justify-content-center") {
+                @CSRF.formField
+                @inputText(esForm("name"),
+                            Symbol("_class") -> "form-group col-8",
+                            Symbol("class") -> "form-control es-form-search",
+                            Symbol("placeholder") -> "type your search here...",
+                            Symbol("_label") -> null
+                )
+                <button id="searchByNameAndEditPictureBtn" type="submit" class="col-2 ml-3 btn btn-light btn-shadow" style="margin-bottom: 8px;">search</button>
+            }
+            </div>
+
+            @*-- SEARCH RESULTS --*@
+            <div class="row justify-content-around my-5">
+                @if(!esProducts.isEmpty) {
+                    @for(p <- esProducts){
+                        <br>
+                        ean = @p.getEan || name = @p.getName || description = @p.getDescription
+                        <br>
+                    }
+                }
+            </div>
+        </div>
+
+        @*-- INDEXING BAR --*@
+        <div class="col-11 admin-background mt-5">
+            <div class="row justify-content-around">
+                <div class="col-5 row justify-content-center my-4">
+                    <div class="col-10">
+                    @form(action = routes.ElasticsearchController.indexAllDbProducts() ) {
+                        @CSRF.formField
+                        <button type="submit" class="btn btn-block btn-warning">INDEX all products in ES</button>
+                    }
+                    </div>
+                    <div class="col-10 mt-4">
+                    @form(action = routes.ElasticsearchController.deleteAllProductsFromEs() ){
+                        @CSRF.formField
+                        <button type="submit" class="btn btn-block btn-danger">DELETE all ES products</button>
+                    }
+                    </div>
+                </div>
+                <div class="col-7 row justify-content-center mt-2">
+                    @form(action = routes.ElasticsearchController.indexOneProductByEan(), Symbol("class") -> "form-inline col-12 row justify-content-center" ) {
+                        @CSRF.formField
+                        @inputText(esForm("ean"),
+                            Symbol("_class") -> "form-group col-6",
+                            Symbol("class") -> "form-control es-form-ean",
+                            Symbol("placeholder") -> "type ean...",
+                            Symbol("_label") -> null
+                        )
+                        <button type="submit" class="col-5 ml-3 btn btn-block btn-light btn-shadow" style="margin-bottom: 8px;">INDEX one product</button>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+}

@@ -17,18 +17,16 @@ public class ApiController extends Controller {
 
     private final ApiService apiService;
     private final JsonService jsonService;
-    private final ElasticsearchService es;
 
     @Inject
-    public ApiController(ApiService apiService, JsonService jsonService, ElasticsearchService es) {
+    public ApiController(ApiService apiService, JsonService jsonService) {
         this.apiService = apiService;
         this.jsonService = jsonService;
-        this.es = es;
     }
 
     public Result showProductsApi(int pageIndex) {
-        JsonNode jsonFetched = this.apiService.getJson().deepCopy();
-        return this.jsonService.showProductsJson(jsonFetched, pageIndex);
+        JsonNode jsonFetched = apiService.getJson().deepCopy();
+        return jsonService.showProductsJson(jsonFetched, pageIndex);
     }
 
     public Result getLightProductsApi() {

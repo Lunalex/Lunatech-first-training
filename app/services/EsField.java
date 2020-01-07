@@ -5,9 +5,7 @@ public enum EsField
     NONE(""),
     EAN("ean"),
     NAME("name"),
-    DESCRIPTION("description"),
-    PROPERTIES("properties"),
-    TYPE("type");
+    DESCRIPTION("description");
 
     private String field;
 

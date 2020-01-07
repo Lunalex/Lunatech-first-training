@@ -194,3 +194,13 @@ footer{
 .admin-background .form-control.admin-form-picture{
     width: 89%;
 }
+
+/*-- Elasticsearch --*/
+
+.form-control.es-form-search {
+    width: 345%;
+}
+
+.form-control.es-form-ean {
+    width: 137%;
+}

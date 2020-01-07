@@ -103,7 +103,6 @@ public class AdminController extends Controller {
 
     // query called from routes-only
     public CompletionStage<Result> filterProductsByName(String name) {
-        System.out.println("just arrived before filterProductsByName ask");
         return FutureConverters.toJava(ask(filterProductsActor, new filterProductsByNameFromRoute(name), 1000))
                 .thenApplyAsync( response -> {
                     List<Product> filteredList = (List<Product>) response;

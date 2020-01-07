@@ -139,6 +139,10 @@ a.card{
     box-shadow: -10px 5px 5px #312502;
 }
 
+.btn-scala-form {
+    margin-bottom: 8px;
+}
+
 footer{
     padding-right: 10%;
     background-color: #312502;
@@ -203,4 +207,13 @@ footer{
 
 .form-control.es-form-ean {
     width: 137%;
+}
+
+.admin-background.bottom-bar {
+    background: rgba(0,0,0,0.9);
+}
+
+.esErrors {
+    font-size: 14px;
+    color:lightgoldenrodyellow;
 }

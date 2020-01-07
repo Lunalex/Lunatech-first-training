@@ -49,7 +49,7 @@
             <br>
             <div class="row justify-content-around mt-2">
             @form(action = routes.AdminController.filterProductsByDescription(), Symbol("class") -> "form-inline col-12 row justify-content-start") {
-                <button type="submit" class="col-4 btn btn-light btn-shadow" style="margin-bottom: 8px;">Search by description</button>
+                <button type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Search by description</button>
                 <div class="form-group col-8">
                     <input class="form-control admin-form-description" type="text" name="search" placeholder="Enter keywords here...">
                 </div>
@@ -57,7 +57,7 @@
             </div>
             <div class="row justify-content-around mt-2">
             @form(action = routes.AdminController.filterProductsByName(), Symbol("class") -> "form-inline col-12 row justify-content-start") {
-                <button type="submit" class="col-4 btn btn-light btn-shadow" style="margin-bottom: 8px;">Search by name</button>
+                <button type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Search by name</button>
                 <div class="form-group col-8">
                     <input class="form-control admin-form-description" type="text" name="search" placeholder="Enter product name here...">
                 </div>
@@ -68,7 +68,7 @@
                 Symbol("class") -> "form-inline col-12 row justify-content-around",
                 Symbol("enctype") -> "multipart/form-data") {
                 @CSRF.formField
-                <button id="searchByNameAndEditPictureBtn" type="submit" class="col-4 btn btn-light btn-shadow" style="margin-bottom: 8px;">Search by name</button>
+                <button id="searchByNameAndEditPictureBtn" type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Search by name</button>
                 @inputText(adminForm("name"),
                     Symbol("_class") -> "form-group col-4",
                     Symbol("class") -> "form-control admin-form-name",

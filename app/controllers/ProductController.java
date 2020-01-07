@@ -132,12 +132,6 @@ public class ProductController extends Controller {
         return redirect(routes.ProductController.showProductsDefault());
     }
 
-    /* -- ELASTICSEARCH -- */
-
-    /*public Result searchExactName(String name) {
-
-    }*/
-
     /* -- API-RELATED -- */
 
     public Result generateProductsApiURL() {

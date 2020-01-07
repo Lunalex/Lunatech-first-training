@@ -5,16 +5,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import models.Product;
 import play.data.Form;
 import play.data.FormFactory;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import services.*;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static services.EsField.*;
 import static services.EsIndex.PRODUCT;
@@ -96,19 +94,48 @@ public class ElasticsearchController extends Controller {
         //return redirect(routes.ElasticsearchController.showAllProductsElasticDefault());
     }
 
-    /*-- find --*/
+    /*-- search --*/
 
-    public Result findProductsByName(String name){
+    public Result searchProducts(String search, Http.Request request) {
+        Form<String> esForm = formFactory.form(String.class).bindFromRequest(request);
+        List<Product> esProductsFinal = new ArrayList<>();
+
+        // search by ean
+        List<Product> esProductsEan = this.findProductsByField(search, EAN);
+        if(!esProductsEan.isEmpty())            esProductsFinal.addAll(esProductsEan);
+        else                                    esForm = esForm.withError(new ValidationError("ean", "no ean corresponding to your search has been found"));
+
+        // search by name
+        List<Product> esProductsName = this.findProductsByField(search, NAME);
+        if(!esProductsName.isEmpty())           esProductsFinal.addAll(esProductsName);
+        else                                    esForm = esForm.withError(new ValidationError("name", "no name corresponding to your search has been found"));
+
+        // search by description
+        List<Product> esProductsDescription = this.findProductsByField(search, DESCRIPTION);
+        if(!esProductsDescription.isEmpty())     esProductsFinal.addAll(esProductsDescription);
+        else                                    esForm = esForm.withError(new ValidationError("description", "no description corresponding to your search has been found"));
+
+        System.out.println("esProductsFinal");
+        System.out.println(esProductsFinal);
+        return ok(views.html.elasticsearch.render(esForm, esProductsFinal, request));
+    }
+
+
+
+    private List<Product> findProductsByField(String search, EsField fieldSearched){
         ObjectNode jsonBody = es.getMapper().createObjectNode();
         ObjectNode childNode1 = es.getMapper().createObjectNode();
         ObjectNode childNode2 = es.getMapper().createObjectNode();
 
-        childNode2.put(NAME.getField(), name);
+        childNode2.put(fieldSearched.getField(), search);
         childNode1.set(MATCH.getParam(), childNode2);
         jsonBody.set(QUERY.getParam(), childNode1);
 
         JsonNode jsonResponse = es.makeElasticsearchQuery(HttpMethod.GET, PRODUCT, EsRequestType.SEARCH, new HashMap<>(), jsonBody);
-        return ok(jsonResponse);
+        System.out.println("jsonResponse findBy "+fieldSearched.getField());
+        System.out.println(jsonResponse);
+        System.out.println("-----------------------");
+        return jsonService.deserializeJsonToListAsFull(es.formatJsonEsResponse(jsonResponse));
     }
 
     /*-- delete --*/
@@ -119,9 +146,8 @@ public class ElasticsearchController extends Controller {
 
     /*-- show --*/
 
-    public Result showElasticsearchPage(Http.Request request){
-        Form<Product> esForm = formFactory.form(Product.class);
-        return ok(views.html.elasticsearch.render(esForm, new ArrayList<>(), request));
+    public Result showElasticsearchPageDefault(Http.Request request){
+        return ok(views.html.elasticsearch.render(formFactory.form(String.class), new ArrayList<>(), request));
     }
 
     public Result showFullRawJsonElastic(){

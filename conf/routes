@@ -43,13 +43,13 @@ GET     /api/fetch/light                controllers.ApiController.getLightProduc
 GET     /api/fetch/light-indirect       controllers.ApiController.getLightProductsApiIndirectMethod
 
 # Elasticsearch-basic-fetchAll
-GET     /es                             controllers.ElasticsearchController.showElasticsearchPageDefault(request: Request)
-GET     /es/search                      controllers.ElasticsearchController.searchProducts(search: String ?="", request: Request)
-GET     /es/full                        controllers.ElasticsearchController.showFullRawJsonElastic
-GET     /es/formatted                   controllers.ElasticsearchController.showFullFormattedJsonElastic
-POST    /es/index/ean                   controllers.ElasticsearchController.indexOneProductByEan(ean: String ?= "")
-POST    /es/index-all                   controllers.ElasticsearchController.indexAllDbProducts
-POST    /es/delete-all                  controllers.ElasticsearchController.deleteAllProductsFromEs()
+GET     /old/es                             controllers.ElasticsearchController.showElasticsearchPageDefault(request: Request)
+GET     /old/es/search                      controllers.ElasticsearchController.searchProducts(search: String ?="", request: Request)
+GET     /old/es/full                        controllers.ElasticsearchController.showFullRawJsonElastic
+GET     /old/es/formatted                   controllers.ElasticsearchController.showFullFormattedJsonElastic
+POST    /old/es/index/ean                   controllers.ElasticsearchController.indexOneProductByEan(ean: String ?= "")
+POST    /old/es/index-all                   controllers.ElasticsearchController.indexAllDbProducts
+POST    /old/es/delete-all                  controllers.ElasticsearchController.deleteAllProductsFromEs()
 
 #Elasticsearch-REST-API
 #GET     /search-exact-name/:name        controllers.ProductController.searchExactName(request: Request, name: String)

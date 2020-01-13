@@ -79,19 +79,8 @@ public class ElasticsearchController extends Controller {
             ndJsonBodyBuilder.append(jsonCreate1).append(System.getProperty("line.separator")).append(jsonProduct1).append(System.getProperty("line.separator"));
         }
         String ndJson = ndJsonBodyBuilder.toString();
-        System.out.println("ndJson");
-        System.out.println(ndJson);
-        System.out.println("--------------------------");
-        System.out.println("----------------------------------");
-        System.out.println("---------------------------------------");
-
         JsonNode jsonResponse = es.makeElasticsearchBulkIndexing(PRODUCT, ndJson);
-        System.out.println("jsonResponse");
-        System.out.println(jsonResponse);
-
         return ok(jsonResponse);
-        //return ok(elasticsearch.formatJsonEsResponse(jsonResponse));
-        //return redirect(routes.ElasticsearchController.showAllProductsElasticDefault());
     }
 
     /*-- search --*/
@@ -149,10 +138,12 @@ public class ElasticsearchController extends Controller {
         // fieldParametersNode
         ObjectNode fieldParametersNode = es.getMapper().createObjectNode();
         fieldParametersNode.put(QUERY.getParam(), search);
-        fieldParametersNode.put(FUZZINESS.getParam(), AUTO.getField());
+        if(!productField.equals(EAN))   fieldParametersNode.put(FUZZINESS.getParam(), AUTO.getField());
+
         // productFieldNode
         ObjectNode productFieldNode = es.getMapper().createObjectNode();
         productFieldNode.set(productField.getField(), fieldParametersNode);
+
         // matchNode
         ObjectNode matchNode = es.getMapper().createObjectNode();
         matchNode.set(MATCH.getParam(), productFieldNode);

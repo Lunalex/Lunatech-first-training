@@ -27,6 +27,10 @@ libraryDependencies ++=Seq(
   "com.univocity" % "univocity-parsers" % "2.4.1",
 
   // to use Elasticsearch with ebean using ebean-elastic
-  "io.ebean" % "ebean-elastic" % "12.1.1"
+  "io.ebean" % "ebean-elastic" % "12.1.1",
+
+  // to use Elasticsearch with the JAVA REST API (including Apapche Http Async Client)
+  "org.elasticsearch.client" % "elasticsearch-rest-client" % "7.5.1",
+  "org.elasticsearch.client" % "elasticsearch-rest-high-level-client" % "7.5.1"
 )
 

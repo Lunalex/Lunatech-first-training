@@ -91,7 +91,7 @@ public class ElasticsearchController extends Controller {
 
         System.out.println("esProductsFinal");
         System.out.println(esProductsFinal);
-        return ok(views.html.elasticsearch.render(esForm, esProductsFinal, request));
+        return ok(views.html.old_elasticsearch.render(esForm, esProductsFinal, request));
     }
 
     private List<Product> getProductsListFromSearch(String search){
@@ -162,7 +162,7 @@ public class ElasticsearchController extends Controller {
     /*-- show --*/
 
     public Result showElasticsearchPageDefault(Http.Request request){
-        return ok(views.html.elasticsearch.render(formFactory.form(String.class), new ArrayList<>(), request));
+        return ok(views.html.old_elasticsearch.render(formFactory.form(String.class), new ArrayList<>(), request));
     }
 
     public Result showFullRawJsonElastic(){

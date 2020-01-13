@@ -15,7 +15,7 @@
 
             @*-- SEARCH BAR --*@
             <div class="row justify-content-around mt-5 mb-3">
-            @form(action = routes.EsController.search(), Symbol("class") -> "form-inline col-12 row justify-content-center") {
+            @form(action = routes.ElasticsearchController.searchProducts(), Symbol("class") -> "form-inline col-12 row justify-content-center") {
                 @CSRF.formField
                 @inputText(esForm("search"),
                     Symbol("_class") -> "form-group col-8", Symbol("class") -> "form-control es-form-search",
@@ -65,7 +65,7 @@
         </div>
 
         @*-- INDEXING BAR --*@
-        @*<div class="col-11 admin-background bottom-bar mt-5">
+        <div class="col-11 admin-background bottom-bar mt-5">
             <div class="row justify-content-around">
                 <div class="col-5 row justify-content-center my-4">
                     <div class="col-10">
@@ -92,6 +92,6 @@
                 </div>
             </div>
 
-        </div>*@
+        </div>
     </div>
 }

@@ -52,5 +52,5 @@ POST    /old/es/index-all                   controllers.ElasticsearchController.
 POST    /old/es/delete-all                  controllers.ElasticsearchController.deleteAllProductsFromEs()
 
 #Elasticsearch-REST-API
-#GET     /search-exact-name/:name        controllers.ProductController.searchExactName(request: Request, name: String)
-#GET     /search-exact-name/:name/:page  controllers.ProductController.searchExactName(request: Request, name: String, page: Int)
+GET     /es                                 controllers.EsController.showEsPageDefault(request: Request)
+GET     /es/search                          controllers.EsController.search(search: String ?="", request: Request)

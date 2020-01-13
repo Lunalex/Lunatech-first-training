@@ -42,6 +42,15 @@ public class Product implements Constraints.Validatable<List<ValidationError>> {
         this.description = description;
     }
 
+    public static Product createProductFromMap(Map<String, Object> sourceFetchedFromEs) throws Exception {
+        if(sourceFetchedFromEs.size() != 3) throw new Exception("a Product need 3 fields to be created");
+        return new Product(
+                (String) sourceFetchedFromEs.get("ean"),
+                (String) sourceFetchedFromEs.get("name"),
+                (String) sourceFetchedFromEs.get("description")
+                );
+    }
+
     public String getEan() {
         return ean;
     }

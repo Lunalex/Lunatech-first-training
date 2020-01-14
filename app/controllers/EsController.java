@@ -48,7 +48,7 @@ public class EsController {
 
         if(!esService.isIndexed(product.getEan()))  esService.indexProduct(product);
         if(esService.isIndexed(product.getEan()))   esService.reIndexProduct(product);
-        return redirect(routes.ProductController.showProductsDefault());
+        return redirect(routes.ProductController.showProductsDefault()).flashing("productCreated", product.toString());
     }
 
     public Result indexAllProducts() {

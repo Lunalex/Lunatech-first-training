@@ -1,6 +1,5 @@
 package controllers;
 
-import actors.PictureUpdateAnswerMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.io.Files;
 import io.ebean.PagedList;
@@ -31,13 +30,15 @@ public class ProductController extends Controller {
     private final MessagesApi messagesApi;
     private final Environment environment;
     private final ProductRepository repo;
+    private final EsController esController;
 
     @Inject
-    public ProductController(FormFactory formFactory, MessagesApi messagesApi, Environment environment, ProductRepository repo) {
+    public ProductController(FormFactory formFactory, MessagesApi messagesApi, Environment environment, ProductRepository repo, EsController esController) {
         this.formFactory = formFactory;
         this.messagesApi = messagesApi;
         this.environment = environment;
         this.repo = repo;
+        this.esController = esController;
     }
 
     public Result showProducts(Http.Request request, int pageIndex) {
@@ -94,7 +95,9 @@ public class ProductController extends Controller {
         }
         // save
         repo.save(newProduct);
-        return redirect(routes.ProductController.showProductsDefault()).flashing("productCreated", newProduct.toString());
+
+        // index in Elasticsearch & redirect to list of products
+        return esController.indexProduct(newProduct.getEan());
     }
 
     public Result saveEditProduct(Http.Request request, String ean) {

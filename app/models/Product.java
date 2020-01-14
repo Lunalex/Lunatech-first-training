@@ -43,12 +43,21 @@ public class Product implements Constraints.Validatable<List<ValidationError>> {
     }
 
     public static Product createProductFromMap(Map<String, Object> sourceFetchedFromEs) throws Exception {
-        if(sourceFetchedFromEs.size() != 3) throw new Exception("a Product need 3 fields to be created");
+        if(sourceFetchedFromEs.size() != 3) throw new Exception("Product not created from Map: a Product need 3 fields to be created");
         return new Product(
                 (String) sourceFetchedFromEs.get("ean"),
                 (String) sourceFetchedFromEs.get("name"),
                 (String) sourceFetchedFromEs.get("description")
                 );
+    }
+
+    public static Map<String, String> createMapFromProduct(Product p) throws Exception {
+        if(p.getEan().isEmpty() || p.getName().isEmpty()) throw new Exception("Map not created from Product: a Product must have an ean & a name");
+        Map<String, String> productParameters = new HashMap<>();
+        productParameters.put("ean", p.getEan());
+        productParameters.put("name", p.getName());
+        productParameters.put("description", p.getDescription());
+        return productParameters;
     }
 
     public String getEan() {

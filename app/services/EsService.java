@@ -3,14 +3,20 @@ package services;
 import models.Product;
 import org.apache.http.HttpHost;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.*;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,17 +38,22 @@ public class EsService {
                 .should(
                        QueryBuilders.matchQuery("ean", search)
                                .fuzziness(Fuzziness.ONE)
-                               .boost(7)
+                               .boost(8)
                 )
                 .should(
                         QueryBuilders.matchQuery("name", search)
                                 .fuzziness(Fuzziness.AUTO)
-                                .boost(5)
+                                .boost(6)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("description", search)
+                                .slop(0)
+                                .boost(4)
                 )
                 .should(
                         QueryBuilders.matchPhrasePrefixQuery("description", search)
                                 .slop(1)
-                                .boost(3)
+                                .boost(2)
                 )
                 .should(
                         QueryBuilders.matchQuery("description", search)
@@ -61,7 +72,7 @@ public class EsService {
             for(SearchHit hit : searchHits) searchResults.add(Product.createProductFromMap(hit.getSourceAsMap()));
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ElasticsearchException("an error occured during search response fetching");
+            throw new ElasticsearchException("an error occurred during search response fetching");
             // TODO: can be improved
         }
         return searchResults;
@@ -69,14 +80,42 @@ public class EsService {
 
     /*- Indexing -*/
     public boolean isIndexed(String ean) {
-        return false;
+        GetRequest getRequest = new GetRequest("product", ean);
+        try {
+            return esClient.exists(getRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new ElasticsearchException("an unexpected error occured during the request");
+        }
     }
 
     public boolean indexExists(String index) {
-        return false;
+        GetIndexRequest getIndexRequest = new GetIndexRequest(index);
+        try {
+            return esClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new ElasticsearchException("an unexpected error occurred during the request");
+        }
     }
 
     public void indexProduct(Product product) {
+        try {
+            // request
+            IndexRequest indexRequest = new IndexRequest("product");
+            indexRequest.id(product.getEan());
+            indexRequest.source(Product.createMapFromProduct(product));
+
+            // response
+            IndexResponse indexResponse = esClient.index(indexRequest, RequestOptions.DEFAULT);
+            ReplicationResponse .ShardInfo shardInfo = indexResponse.getShardInfo();
+
+            System.out.println("indexing product "+ product.getEan() +" = ");
+            if(shardInfo.getSuccessful() == 0) System.out.println("SUCCESS");
+            else                               System.out.println("FAILURE");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ElasticsearchException("an unexpected error occurred during the request or the response");
+        }
 
     }
 

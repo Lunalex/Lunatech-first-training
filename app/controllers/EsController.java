@@ -40,15 +40,16 @@ public class EsController {
     }
 
     /*- Indexing -*/
-    public Result indexProduct(String ean) {
+    public Result indexProduct(String ean, boolean isNewProduct) {
         Optional<Product> maybeProduct = repo.findByEan(ean);
         if(!maybeProduct.isPresent())   return notFound(views.html.notFound404.render());
-
         Product product = maybeProduct.get();
 
-        if(!esService.isIndexed(product.getEan()))  esService.indexProduct(product);
-        if(esService.isIndexed(product.getEan()))   esService.reIndexProduct(product);
-        return redirect(routes.ProductController.showProductsDefault()).flashing("productCreated", product.toString());
+        if(esService.isIndexed(ean))   esService.reIndexProduct(product);
+        else                           esService.indexProduct(product);
+
+        if(isNewProduct)   return redirect(routes.ProductController.showProductsDefault()).flashing("productCreated", product.toString());
+        else               return redirect(routes.ProductController.showProductsDefault()).flashing("productEdited", product.toString());
     }
 
     public Result indexAllProducts() {
@@ -58,8 +59,14 @@ public class EsController {
     }
 
     /*- Delete -*/
+    public Result deleteProduct(String ean, String productString) {
+        if(esService.isIndexed(ean))    esService.deleteProduct(ean);
+        return redirect(routes.ProductController.showProductsDefault()).flashing("productDeleted", productString);
+    }
+
+
     public Result deleteAllProducts() {
-        esService.deleteProductIndex();
+        esService.deleteAll();
         return redirect(routes.EsController.showEsPageDefault());
     }
 

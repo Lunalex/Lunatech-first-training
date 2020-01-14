@@ -33,7 +33,7 @@ GET     /product/:ean/edit              controllers.ProductController.prepareEdi
 POST    /product/:ean/edit              controllers.ProductController.saveEditProduct(request: Request, ean: String)
 
 # DELETE works only when using JQuery as intermediary -> to use pure Play need to make this POST
-DELETE  /product/:ean/delete            controllers.ProductController.deleteProduct(request: Request, ean: String)
+POST    /product/:ean/delete            controllers.ProductController.deleteProduct(ean: String)
 
 # API
 GET     /api                            controllers.ProductController.generateProductsApiURL
@@ -45,6 +45,7 @@ GET     /api/fetch/light-indirect       controllers.ApiController.getLightProduc
 #Elasticsearch
 GET     /es                                 controllers.EsController.showEsPageDefault(request: Request)
 GET     /es/search                          controllers.EsController.search(search: String ?="", request: Request)
-POST    /es/index/:ean                      controllers.EsController.indexProduct(ean: String)
+POST    /es/index/:ean                      controllers.EsController.indexProduct(ean: String, isNewProduct: Boolean)
+POST    /es/index/:ean/delete               controllers.EsController.deleteProduct(ean: String, productString: String)
 POST    /es/index-all                       controllers.EsController.indexAllProducts
 POST    /es/delete-all                      controllers.EsController.deleteAllProducts()

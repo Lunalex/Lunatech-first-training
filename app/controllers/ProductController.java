@@ -56,7 +56,7 @@ public class ProductController extends Controller {
             return notFound(views.html.notFound404.render());
         }
         Product myProduct = maybeProduct.get();
-        return ok(views.html.showProduct.render(request, messagesApi.preferred(request), myProduct));
+        return ok(views.html.showProduct.render(request, messagesApi.preferred(request), myProduct, formFactory.form(String.class)));
     }
 
     public Result showProductImage(String ean) {
@@ -97,7 +97,7 @@ public class ProductController extends Controller {
         repo.save(newProduct);
 
         // index in Elasticsearch & redirect to list of products
-        return esController.indexProduct(newProduct.getEan());
+        return esController.indexProduct(newProduct.getEan(), true);
     }
 
     public Result saveEditProduct(Http.Request request, String ean) {
@@ -123,16 +123,21 @@ public class ProductController extends Controller {
         // delete old & save new
         repo.delete(newProduct.getEan());
         repo.save(newProduct);
-        return redirect(routes.ProductController.showProductsDefault()).flashing("productEdited", newProduct.toString());
+
+        // index in Elasticsearch & redirect to list of products
+        return esController.indexProduct(newProduct.getEan(), false);
     }
 
-    public Result deleteProduct(Http.Request request, String ean) {
+    public Result deleteProduct(String ean) {
         Optional<Product> maybeProduct = repo.findByEan(ean);
         if (!maybeProduct.isPresent()) {
             return notFound(views.html.notFound404.render());
         }
+        String productString = maybeProduct.get().toString();
+        // delete in Db
         repo.delete(ean);
-        return redirect(routes.ProductController.showProductsDefault());
+        // delete in Elasticsearch & redirect to list of products
+        return esController.deleteProduct(ean, productString);
     }
 
     /* -- API-RELATED -- */

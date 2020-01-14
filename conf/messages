@@ -35,6 +35,7 @@ error.picture.size=The picture file you chose is too big
 #alert
 alert.createProduct.success={0} has been successfully added to the products''list
 alert.updateProduct.success={0} has been successfully updated
+alert.deleteProduct.success={0} has been successfully deleted
 
 #modal
 modal.title.productDelete=Delete this product?

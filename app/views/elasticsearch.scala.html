@@ -17,9 +17,10 @@
                         <button type="button" class="btn btn-danger btn-block" data-dismiss="modal">Go back</button>
                     </div>
                     <div class="col-5">
-                        <button type="button" class="btn btn-success btn-block delete-product-btn"
-                        data-url="@routes.EsController.deleteAllProducts()" data-token="@helper.CSRF.getToken.value"
-                        >Confirm</button>
+                        @form(action = routes.EsController.deleteAllProducts()) {
+                            @CSRF.formField
+                            <button type="submit" class="btn btn-success btn-block delete-product-btn">Confirm</button>
+                        }
                     </div>
                 </div>
             </div>

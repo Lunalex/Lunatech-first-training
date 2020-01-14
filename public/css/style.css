@@ -127,6 +127,7 @@ a.card{
     position: absolute;
     top: -2px;
     right: 5px;
+    cursor: pointer;
 }
 
 #product-delete:hover{

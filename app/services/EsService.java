@@ -3,11 +3,15 @@ package services;
 import models.Product;
 import org.apache.http.HttpHost;
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.Fuzziness;
@@ -19,6 +23,8 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class EsService {
 
@@ -109,18 +115,39 @@ public class EsService {
             ReplicationResponse .ShardInfo shardInfo = indexResponse.getShardInfo();
 
             System.out.println("indexing product "+ product.getEan() +" = ");
-            if(shardInfo.getSuccessful() == 0) System.out.println("SUCCESS");
-            else                               System.out.println("FAILURE");
+            if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
+            else                               System.out.println("SUCCESS");
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ElasticsearchException("an unexpected error occurred during the request or the response");
+            throw new ElasticsearchException("DOC INDEXING: an unexpected error occurred during the request or the response");
         }
-
     }
 
     public void reIndexProduct(Product product) {
+        try {
+            // request
+            UpdateRequest updateRequest = new UpdateRequest("product", product.getEan());
+            updateRequest.doc(jsonBuilder()
+                            .startObject()
+                                .field("ean", product.getEan())
+                                .field("name", product.getName())
+                                .field("description", product.getDescription())
+                            .endObject()
+            );
 
+            // response
+            UpdateResponse updateResponse = esClient.update(updateRequest, RequestOptions.DEFAULT);
+            ReplicationResponse.ShardInfo shardInfo = updateResponse.getShardInfo();
+
+            System.out.println("updating product in ES "+ product.getEan() +" = ");
+            if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
+            else                               System.out.println("SUCCESS");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ElasticsearchException("DOC UPDATE: an unexpected error occurred during the request or the response");
+        }
     }
 
     public void indexAll(String index) {
@@ -132,7 +159,26 @@ public class EsService {
     }
 
     /*- Delete -*/
-    public void deleteProductIndex() {
+    public void deleteProduct(String ean) {
+        try {
+            // request
+            DeleteRequest deleteRequest = new DeleteRequest("product", ean);
+
+            // response
+            DeleteResponse deleteResponse = esClient.delete(deleteRequest, RequestOptions.DEFAULT);
+            ReplicationResponse.ShardInfo shardInfo = deleteResponse.getShardInfo();
+
+            System.out.println("deleting product in ES "+ ean +" = ");
+            if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
+            else                               System.out.println("SUCCESS");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ElasticsearchException("DOC DELETION: an unexpected error occurred during the request or the response");
+        }
+    }
+
+    public void deleteAll() {
 
     }
 

@@ -213,6 +213,13 @@ footer{
     background: rgba(0,0,0,0.9);
 }
 
+.admin-background.bottom-bar .btn:hover {
+    color: whitesmoke;
+    cursor: pointer;
+}
+
+
+
 .esErrors {
     font-size: 14px;
     color:lightgoldenrodyellow;

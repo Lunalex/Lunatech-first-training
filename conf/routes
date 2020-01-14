@@ -42,15 +42,9 @@ GET     /api/fetch/raw                  controllers.ApiController.getFullProduct
 GET     /api/fetch/light                controllers.ApiController.getLightProductsApi
 GET     /api/fetch/light-indirect       controllers.ApiController.getLightProductsApiIndirectMethod
 
-# Elasticsearch-basic-fetchAll
-GET     /old/es                             controllers.ElasticsearchController.showElasticsearchPageDefault(request: Request)
-GET     /old/es/search                      controllers.ElasticsearchController.searchProducts(search: String ?="", request: Request)
-GET     /old/es/full                        controllers.ElasticsearchController.showFullRawJsonElastic
-GET     /old/es/formatted                   controllers.ElasticsearchController.showFullFormattedJsonElastic
-POST    /old/es/index/ean                   controllers.ElasticsearchController.indexOneProductByEan(ean: String ?= "")
-POST    /old/es/index-all                   controllers.ElasticsearchController.indexAllDbProducts
-POST    /old/es/delete-all                  controllers.ElasticsearchController.deleteAllProductsFromEs()
-
-#Elasticsearch-REST-API
+#Elasticsearch
 GET     /es                                 controllers.EsController.showEsPageDefault(request: Request)
 GET     /es/search                          controllers.EsController.search(search: String ?="", request: Request)
+POST    /es/index/:ean                      controllers.EsController.indexProduct(ean: String)
+POST    /es/index-all                       controllers.EsController.indexAllProducts
+POST    /es/delete-all                      controllers.EsController.deleteAllProducts()

@@ -67,4 +67,34 @@ public class EsService {
         return searchResults;
     }
 
+    /*- Indexing -*/
+    public boolean isIndexed(String ean) {
+        return false;
+    }
+
+    public boolean indexExists(String index) {
+        return false;
+    }
+
+    public void indexProduct(Product product) {
+
+    }
+
+    public void reIndexProduct(Product product) {
+
+    }
+
+    public void indexAll(String index) {
+
+    }
+
+    public void reIndexAll(String index) {
+
+    }
+
+    /*- Delete -*/
+    public void deleteProductIndex() {
+
+    }
+
 }

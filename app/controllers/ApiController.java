@@ -6,11 +6,9 @@ import models.Product;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.ApiService;
-import services.ElasticsearchService;
 import services.JsonService;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.util.List;
 
 public class ApiController extends Controller {

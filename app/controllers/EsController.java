@@ -9,10 +9,12 @@ import services.EsService;
 import services.ProductRepository;
 
 import javax.inject.Inject;
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static play.mvc.Results.ok;
+import static play.mvc.Results.*;
 
 public class EsController {
 
@@ -27,26 +29,41 @@ public class EsController {
         this.formFactory = formFactory;
     }
 
-    /*-- display page --*/
     public Result showEsPageDefault(Http.Request request){
         return ok(views.html.elasticsearch.render(formFactory.form(String.class), new ArrayList<>(), request));
     }
-
-    // index all for the first time or reindex all (if already indexed)
-    /*public Result indexAll() {
-
-    }*/
-
-    // index-create one more product or index-update existing product
-    /*public Result indexOne(String ean) {
-
-    }*/
 
     public Result search(String search, Http.Request request) {
         Form<String> esForm = formFactory.form(String.class).bindFromRequest(request);
         List<Product> esProductsFinal = esService.searchProducts(search);
         return ok(views.html.elasticsearch.render(esForm, esProductsFinal, request));
     }
+
+    /*- Indexing -*/
+    public Result indexProduct(String ean) {
+        Optional<Product> maybeProduct = repo.findByEan(ean);
+        if(!maybeProduct.isPresent())   return notFound(views.html.notFound404.render());
+
+        Product product = maybeProduct.get();
+
+        if(!esService.isIndexed(product.getEan()))  esService.indexProduct(product);
+        if(esService.isIndexed(product.getEan()))   esService.reIndexProduct(product);
+        return redirect(routes.ProductController.showProductsDefault());
+    }
+
+    public Result indexAllProducts() {
+        if(!esService.indexExists("product"))   esService.indexAll("product");
+        if(esService.indexExists("product"))    esService.reIndexAll("product");
+        return redirect(routes.ProductController.showProductsDefault());
+    }
+
+    /*- Delete -*/
+    public Result deleteAllProducts() {
+        esService.deleteProductIndex();
+        return redirect(routes.EsController.showEsPageDefault());
+    }
+
+
 
 
 

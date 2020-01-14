@@ -2,10 +2,35 @@
 @import helper._
 
 @main("Elasticsearch"){
+    <!-- Modal -->
+    <div class="modal fade" id="index-delete-modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete all products from Elasticsearch?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body row justify-content-around">
+                    <div class="col-5">
+                        <button type="button" class="btn btn-danger btn-block" data-dismiss="modal">Go back</button>
+                    </div>
+                    <div class="col-5">
+                        <button type="button" class="btn btn-success btn-block delete-product-btn"
+                        data-url="@routes.EsController.deleteAllProducts()" data-token="@helper.CSRF.getToken.value"
+                        >Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <!-- <end>Modal -->
     <br>
     <div class="row">
         <div class="col">
             <a class="btn btn-outline-primary btn-shadow" href="@routes.HomeController.index()">Back to index</a>
+            <a class="btn btn-outline-success btn-shadow ml-3" href="@routes.ProductController.showProductsDefault()">See all products</a>
         </div>
     </div>
     <br>
@@ -65,33 +90,18 @@
         </div>
 
         @*-- INDEXING BAR --*@
-        @*<div class="col-11 admin-background bottom-bar mt-5">
-            <div class="row justify-content-around">
-                <div class="col-5 row justify-content-center my-4">
-                    <div class="col-10">
-                    @form(action = routes.ElasticsearchController.indexAllDbProducts() ) {
+        <div class="col-11 admin-background bottom-bar my-5">
+            <div class="row justify-content-around my-3">
+                <div class="col-4 my-3">
+                    @form(action = routes.EsController.indexAllProducts()) {
                         @CSRF.formField
-                        <button type="submit" class="btn btn-block btn-warning">INDEX all products in ES</button>
+                        <button type="submit" class="btn btn-block btn-warning py-2">INDEX ALL PRODUCTS</button>
                     }
-                    </div>
-                    <div class="col-10 mt-4">
-                    @form(action = routes.ElasticsearchController.deleteAllProductsFromEs() ){
-                        @CSRF.formField
-                        <button type="submit" class="btn btn-block btn-danger">DELETE all ES products</button>
-                    }
-                    </div>
                 </div>
-                <div class="col-7 row justify-content-center mt-2">
-                    @form(action = routes.ElasticsearchController.indexOneProductByEan(), Symbol("class") -> "form-inline col-12 row justify-content-center" ) {
-                        @CSRF.formField
-                        <div class="form-group col-6">
-                            <input class="form-control es-form-ean" type="text" name="ean" placeholder="type ean...">
-                        </div>
-                        <button type="submit" class="col-5 ml-3 btn btn-block btn-light btn-shadow btn-scala-form">INDEX one product</button>
-                    }
+                <div class="col-4 my-3">
+                    <a class="btn btn-block btn-danger py-2" data-toggle="modal" data-target="#index-delete-modal">DELETE ALL PRODUCTS</a>
                 </div>
             </div>
-
-        </div>*@
+        </div>
     </div>
 }

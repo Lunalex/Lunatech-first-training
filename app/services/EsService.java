@@ -2,13 +2,18 @@ package services;
 
 import models.Product;
 import org.apache.http.HttpHost;
-import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.ActionListener;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.bulk.BulkItemResponse;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.*;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
@@ -18,32 +23,38 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import services.custom.exceptions.elasticsearch.BulkItemResponseFailedException;
+import services.custom.exceptions.elasticsearch.BulkRequestFailedException;
+import services.custom.exceptions.elasticsearch.EsResponseCannotBeFetchedException;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 public class EsService {
 
     private final RestHighLevelClient esClient;
+    private final ProductRepository repo;
+    private static final String PRODUCT_INDEX = "product";
 
     @Inject
-    public EsService() {
+    public EsService(ProductRepository repo) {
+        this.repo = repo;
         this.esClient = new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
         // TODO: need to investigate when it could be interesting to close the esClient
     }
 
     public List<Product> searchProducts(String search) {
         // request
-        SearchRequest searchRequest = new SearchRequest("product");
+        SearchRequest searchRequest = new SearchRequest(PRODUCT_INDEX);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
                 .should(
                        QueryBuilders.matchQuery("ean", search)
-                               .fuzziness(Fuzziness.ONE)
+                               .prefixLength(8)
+                               .fuzziness(Fuzziness.ZERO)
                                .boost(8)
                 )
                 .should(
@@ -72,25 +83,27 @@ public class EsService {
 
         // response
         List<Product> searchResults = new ArrayList<>();
-        try {
-            SearchResponse searchResponse =  esClient.search(searchRequest, RequestOptions.DEFAULT);
-            SearchHit[] searchHits = searchResponse.getHits().getHits();
-            for(SearchHit hit : searchHits) searchResults.add(Product.createProductFromMap(hit.getSourceAsMap()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ElasticsearchException("an error occurred during search response fetching");
-            // TODO: can be improved
+
+        if(this.indexExists(PRODUCT_INDEX)) {
+            try {
+                SearchResponse searchResponse =  esClient.search(searchRequest, RequestOptions.DEFAULT);
+                SearchHit[] searchHits = searchResponse.getHits().getHits();
+                for(SearchHit hit : searchHits) searchResults.add(Product.createProductFromMap(hit.getSourceAsMap()));
+            } catch (Exception e) {
+                throw new EsResponseCannotBeFetchedException(e);
+            }
         }
+
         return searchResults;
     }
 
     /*- Indexing -*/
     public boolean isIndexed(String ean) {
-        GetRequest getRequest = new GetRequest("product", ean);
+        GetRequest getRequest = new GetRequest(PRODUCT_INDEX, ean);
         try {
             return esClient.exists(getRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new ElasticsearchException("an unexpected error occured during the request");
+            throw new EsResponseCannotBeFetchedException(e);
         }
     }
 
@@ -99,14 +112,31 @@ public class EsService {
         try {
             return esClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new ElasticsearchException("an unexpected error occurred during the request");
+            throw new EsResponseCannotBeFetchedException(e);
+        }
+    }
+
+    public void checkAllProductsFromDbAreIndexed() {
+        System.out.println("------------------------");
+        System.out.println("------------------------");
+        System.out.println("------------------------");
+        List<Product> allProductsInDb = repo.getAllProductsAsList();
+        int count = 0;
+        for(Product p : allProductsInDb) {
+            boolean isIndexed = isIndexed(p.getEan());
+            if(!isIndexed){
+                System.out.println("iteration number = "+count);
+                System.out.println("current product = "+p.toString());
+                System.out.println("------------------------");
+            }
+            count++;
         }
     }
 
     public void indexProduct(Product product) {
         try {
             // request
-            IndexRequest indexRequest = new IndexRequest("product");
+            IndexRequest indexRequest = new IndexRequest(PRODUCT_INDEX);
             indexRequest.id(product.getEan());
             indexRequest.source(Product.createMapFromProduct(product));
 
@@ -114,27 +144,20 @@ public class EsService {
             IndexResponse indexResponse = esClient.index(indexRequest, RequestOptions.DEFAULT);
             ReplicationResponse .ShardInfo shardInfo = indexResponse.getShardInfo();
 
-            System.out.println("indexing product "+ product.getEan() +" = ");
+            System.out.println("indexing product in ES "+ product.getEan() +" = ");
             if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
             else                               System.out.println("SUCCESS");
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new ElasticsearchException("DOC INDEXING: an unexpected error occurred during the request or the response");
+            throw new EsResponseCannotBeFetchedException(e);
         }
     }
 
     public void reIndexProduct(Product product) {
         try {
             // request
-            UpdateRequest updateRequest = new UpdateRequest("product", product.getEan());
-            updateRequest.doc(jsonBuilder()
-                            .startObject()
-                                .field("ean", product.getEan())
-                                .field("name", product.getName())
-                                .field("description", product.getDescription())
-                            .endObject()
-            );
+            UpdateRequest updateRequest = new UpdateRequest(PRODUCT_INDEX, product.getEan());
+            updateRequest.doc(Product.createJsonSourceFromProduct(product));
 
             // response
             UpdateResponse updateResponse = esClient.update(updateRequest, RequestOptions.DEFAULT);
@@ -146,23 +169,26 @@ public class EsService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ElasticsearchException("DOC UPDATE: an unexpected error occurred during the request or the response");
+            throw new EsResponseCannotBeFetchedException(e);
         }
     }
 
-    public void indexAll(String index) {
-
-    }
-
-    public void reIndexAll(String index) {
-
+    public void indexAll() {
+        int batchNumber = 0;
+        boolean keepIndexing = true;
+        while(keepIndexing) {
+            keepIndexing = this.bulkByBatch(batchNumber);
+            batchNumber++;
+        }
+        System.out.println("final batch number:");
+        System.out.println(batchNumber);
     }
 
     /*- Delete -*/
     public void deleteProduct(String ean) {
         try {
             // request
-            DeleteRequest deleteRequest = new DeleteRequest("product", ean);
+            DeleteRequest deleteRequest = new DeleteRequest(PRODUCT_INDEX, ean);
 
             // response
             DeleteResponse deleteResponse = esClient.delete(deleteRequest, RequestOptions.DEFAULT);
@@ -172,14 +198,48 @@ public class EsService {
             if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
             else                               System.out.println("SUCCESS");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ElasticsearchException("DOC DELETION: an unexpected error occurred during the request or the response");
+        } catch (IOException e) {
+            throw new EsResponseCannotBeFetchedException(e);
         }
     }
 
     public void deleteAll() {
+        try{
+            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(PRODUCT_INDEX);
+            AcknowledgedResponse deleteIndexResponse = esClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+            boolean isSuccessful = deleteIndexResponse.isAcknowledged();
 
+            System.out.println("deleting product full-index in ES = ");
+            if(isSuccessful)    System.out.println("SUCCESS");
+            else                System.out.println("FAILURE");
+
+        } catch (IOException e) {
+            throw new EsResponseCannotBeFetchedException(e);
+        }
+    }
+
+    /*- private -*/
+    private boolean bulkByBatch(int batchNumber) {
+        BulkRequest bulkRequest = new BulkRequest();
+        List<Product> productList = repo.batch(batchNumber);
+
+        int count = 0;
+        for(Product currentProduct : productList) {
+            System.out.println("current product =");
+            System.out.println(currentProduct.toString());
+            System.out.println(count++);
+            if(isIndexed(currentProduct.getEan()))  bulkRequest.add(new UpdateRequest(PRODUCT_INDEX, currentProduct.getEan()).doc(Product.createJsonSourceFromProduct(currentProduct)));
+            else                                    bulkRequest.add(new IndexRequest(PRODUCT_INDEX).id(currentProduct.getEan()).source(Product.createJsonSourceFromProduct(currentProduct)));
+        }
+
+        try {
+            esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new BulkRequestFailedException(e);
+        }
+        System.out.println("keep indexing after batch "+batchNumber+"?");
+        System.out.println(productList.size() == 100);
+        return productList.size() == 100;
     }
 
 }

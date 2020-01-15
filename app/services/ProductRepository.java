@@ -16,6 +16,7 @@ public class ProductRepository {
 
     private final EbeanServer ebeanServer;
     public final static int PAGE_SIZE = 5;
+    public final static int BATCH_SIZE = 100;
 
     @Inject
     public ProductRepository(EbeanConfig ebeanConfig){
@@ -25,6 +26,14 @@ public class ProductRepository {
     public List<Product> getAllProductsAsList() {
         return ebeanServer.find(Product.class)
                 .order("name")
+                .findList();
+    }
+
+    public List<Product> batch(int batchNumber) {
+        return ebeanServer.find(Product.class)
+                .order("name")
+                .setFirstRow(batchNumber * BATCH_SIZE)
+                .setMaxRows(BATCH_SIZE)
                 .findList();
     }
 

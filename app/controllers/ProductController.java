@@ -41,6 +41,10 @@ public class ProductController extends Controller {
         this.esController = esController;
     }
 
+    public Result numberOfProductsInDb() {
+        return ok(Integer.toString(repo.getAllProductsAsList().size()));
+    }
+
     public Result showProducts(Http.Request request, int pageIndex) {
         PagedList<Product> currentPage = repo.page(pageIndex);
         return ok(views.html.showProducts.render(currentPage, request, messagesApi.preferred(request)));

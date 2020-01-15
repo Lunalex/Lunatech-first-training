@@ -9,7 +9,6 @@ import services.EsService;
 import services.ProductRepository;
 
 import javax.inject.Inject;
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,9 +52,13 @@ public class EsController {
     }
 
     public Result indexAllProducts() {
-        if(!esService.indexExists("product"))   esService.indexAll("product");
-        if(esService.indexExists("product"))    esService.reIndexAll("product");
+        esService.indexAll();
         return redirect(routes.ProductController.showProductsDefault());
+    }
+
+    public Result areAllProductsIndexed() {
+        esService.checkAllProductsFromDbAreIndexed();
+        return redirect(routes.HomeController.index());
     }
 
     /*- Delete -*/
@@ -64,15 +67,10 @@ public class EsController {
         return redirect(routes.ProductController.showProductsDefault()).flashing("productDeleted", productString);
     }
 
-
     public Result deleteAllProducts() {
-        esService.deleteAll();
+        if(esService.indexExists("product"))    esService.deleteAll();
         return redirect(routes.EsController.showEsPageDefault());
     }
-
-
-
-
 
 
 }

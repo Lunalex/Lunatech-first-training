@@ -23,6 +23,7 @@ import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import play.libs.Json;
 import services.custom.exceptions.elasticsearch.BulkItemResponseFailedException;
 import services.custom.exceptions.elasticsearch.BulkRequestFailedException;
 import services.custom.exceptions.elasticsearch.EsResponseCannotBeFetchedException;
@@ -182,6 +183,7 @@ public class EsService {
         }
         System.out.println("final batch number:");
         System.out.println(batchNumber);
+        //this.bulkAll();
     }
 
     /*- Delete -*/
@@ -219,9 +221,9 @@ public class EsService {
     }
 
     /*- private -*/
-    private boolean bulkByBatch(int batchNumber) {
+    private void bulkAll() {
         BulkRequest bulkRequest = new BulkRequest();
-        List<Product> productList = repo.batch(batchNumber);
+        List<Product> productList = repo.getAllProductsAsList();
 
         int count = 0;
         for(Product currentProduct : productList) {
@@ -237,8 +239,28 @@ public class EsService {
         } catch (IOException e) {
             throw new BulkRequestFailedException(e);
         }
-        System.out.println("keep indexing after batch "+batchNumber+"?");
-        System.out.println(productList.size() == 100);
+    }
+
+    private boolean bulkByBatch(int batchNumber) {
+        BulkRequest bulkRequest = new BulkRequest();
+        List<Product> productList = repo.batch(batchNumber);
+
+        //int count = 0;
+        for(Product currentProduct : productList) {
+            /*System.out.println("current product =");
+            System.out.println(currentProduct.toString());
+            System.out.println(count++);*/
+            if(isIndexed(currentProduct.getEan()))  bulkRequest.add(new UpdateRequest(PRODUCT_INDEX, currentProduct.getEan()).doc(Product.createJsonSourceFromProduct(currentProduct)));
+            else                                    bulkRequest.add(new IndexRequest(PRODUCT_INDEX).id(currentProduct.getEan()).source(Json.toJson(currentProduct)));
+        }
+
+        try {
+            esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            throw new BulkRequestFailedException(e);
+        }
+        /*System.out.println("keep indexing after batch "+batchNumber+"?");
+        System.out.println(productList.size() == 100);*/
         return productList.size() == 100;
     }
 

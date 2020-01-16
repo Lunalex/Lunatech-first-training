@@ -2,7 +2,6 @@ package services;
 
 import models.Product;
 import org.apache.http.HttpHost;
-import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -13,25 +12,19 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.*;
-import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import play.libs.Json;
-import services.custom.exceptions.elasticsearch.BulkItemResponseFailedException;
 import services.custom.exceptions.elasticsearch.BulkRequestFailedException;
 import services.custom.exceptions.elasticsearch.EsResponseCannotBeFetchedException;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import static services.ProductRepository.BATCH_SIZE;
@@ -130,6 +123,7 @@ public class EsService {
             keepIndexing = this.bulkIndexByBatch(batchNumber);
             batchNumber++;
         }
+        System.out.printf("indexation done with %s%n batch", batchNumber);
     }
 
     /*- Delete -*/

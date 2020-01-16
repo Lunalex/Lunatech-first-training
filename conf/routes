@@ -33,7 +33,7 @@ GET     /product/:ean/edit              controllers.ProductController.prepareEdi
 POST    /product/:ean/edit              controllers.ProductController.saveEditProduct(request: Request, ean: String)
 GET     /total                          controllers.ProductController.numberOfProductsInDb
 
-# DELETE works only when using JQuery as intermediary -> to use pure Play need to make this POST
+# DELETE
 POST    /product/:ean/delete            controllers.ProductController.deleteProduct(ean: String)
 
 # API

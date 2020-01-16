@@ -44,7 +44,6 @@ GET     /api/fetch/light                controllers.ApiController.getLightProduc
 GET     /api/fetch/light-indirect       controllers.ApiController.getLightProductsApiIndirectMethod
 
 #Elasticsearch
-GET     /es/check                       controllers.EsController.areAllProductsIndexed
 GET     /es                             controllers.EsController.showEsPageDefault(request: Request)
 GET     /es/search                      controllers.EsController.search(search: String ?="", request: Request)
 POST    /es/index/:ean                  controllers.EsController.indexProduct(ean: String, isNewProduct: Boolean)

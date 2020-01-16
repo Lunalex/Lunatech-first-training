@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static services.ProductRepository.BATCH_SIZE;
+
 public class EsService {
 
     private final RestHighLevelClient esClient;
@@ -85,7 +87,7 @@ public class EsService {
         // response
         List<Product> searchResults = new ArrayList<>();
 
-        if(this.indexExists(PRODUCT_INDEX)) {
+        if(this.indexExists()) {
             try {
                 SearchResponse searchResponse =  esClient.search(searchRequest, RequestOptions.DEFAULT);
                 SearchHit[] searchHits = searchResponse.getHits().getHits();
@@ -99,41 +101,6 @@ public class EsService {
     }
 
     /*- Indexing -*/
-    public boolean isIndexed(String ean) {
-        GetRequest getRequest = new GetRequest(PRODUCT_INDEX, ean);
-        try {
-            return esClient.exists(getRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new EsResponseCannotBeFetchedException(e);
-        }
-    }
-
-    public boolean indexExists(String index) {
-        GetIndexRequest getIndexRequest = new GetIndexRequest(index);
-        try {
-            return esClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new EsResponseCannotBeFetchedException(e);
-        }
-    }
-
-    public void checkAllProductsFromDbAreIndexed() {
-        System.out.println("------------------------");
-        System.out.println("------------------------");
-        System.out.println("------------------------");
-        List<Product> allProductsInDb = repo.getAllProductsAsList();
-        int count = 0;
-        for(Product p : allProductsInDb) {
-            boolean isIndexed = isIndexed(p.getEan());
-            if(!isIndexed){
-                System.out.println("iteration number = "+count);
-                System.out.println("current product = "+p.toString());
-                System.out.println("------------------------");
-            }
-            count++;
-        }
-    }
-
     public void indexProduct(Product product) {
         try {
             // request
@@ -148,120 +115,89 @@ public class EsService {
             System.out.println("indexing product in ES "+ product.getEan() +" = ");
             if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
             else                               System.out.println("SUCCESS");
-
         } catch (Exception e) {
-            throw new EsResponseCannotBeFetchedException(e);
-        }
-    }
-
-    public void reIndexProduct(Product product) {
-        try {
-            // request
-            UpdateRequest updateRequest = new UpdateRequest(PRODUCT_INDEX, product.getEan());
-            updateRequest.doc(Product.createJsonSourceFromProduct(product));
-
-            // response
-            UpdateResponse updateResponse = esClient.update(updateRequest, RequestOptions.DEFAULT);
-            ReplicationResponse.ShardInfo shardInfo = updateResponse.getShardInfo();
-
-            System.out.println("updating product in ES "+ product.getEan() +" = ");
-            if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
-            else                               System.out.println("SUCCESS");
-
-        } catch (Exception e) {
-            e.printStackTrace();
             throw new EsResponseCannotBeFetchedException(e);
         }
     }
 
     public void indexAll() {
+        // clean EsShards
+        this.deleteAll();
+        // reindex all products batch by batch
         int batchNumber = 0;
         boolean keepIndexing = true;
         while(keepIndexing) {
-            keepIndexing = this.bulkByBatch(batchNumber);
+            keepIndexing = this.bulkIndexByBatch(batchNumber);
             batchNumber++;
         }
-        System.out.println("final batch number:");
-        System.out.println(batchNumber);
-        //this.bulkAll();
     }
 
     /*- Delete -*/
     public void deleteProduct(String ean) {
-        try {
-            // request
-            DeleteRequest deleteRequest = new DeleteRequest(PRODUCT_INDEX, ean);
+        if(this.isIndexed(ean)) {
+            try {
+                // request
+                DeleteRequest deleteRequest = new DeleteRequest(PRODUCT_INDEX, ean);
 
-            // response
-            DeleteResponse deleteResponse = esClient.delete(deleteRequest, RequestOptions.DEFAULT);
-            ReplicationResponse.ShardInfo shardInfo = deleteResponse.getShardInfo();
+                // response
+                DeleteResponse deleteResponse = esClient.delete(deleteRequest, RequestOptions.DEFAULT);
+                ReplicationResponse.ShardInfo shardInfo = deleteResponse.getShardInfo();
 
-            System.out.println("deleting product in ES "+ ean +" = ");
-            if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
-            else                               System.out.println("SUCCESS");
+                System.out.println("deleting product in ES "+ ean +" = ");
+                if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
+                else                               System.out.println("SUCCESS");
 
-        } catch (IOException e) {
-            throw new EsResponseCannotBeFetchedException(e);
+            } catch (IOException e) {
+                throw new EsResponseCannotBeFetchedException(e);
+            }
         }
     }
 
     public void deleteAll() {
-        try{
-            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(PRODUCT_INDEX);
-            AcknowledgedResponse deleteIndexResponse = esClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
-            boolean isSuccessful = deleteIndexResponse.isAcknowledged();
+        if(this.indexExists()) {
+            try{
+                DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(PRODUCT_INDEX);
+                esClient.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+            } catch (IOException e) {
+                throw new EsResponseCannotBeFetchedException(e);
+            }
+        }
+    }
 
-            System.out.println("deleting product full-index in ES = ");
-            if(isSuccessful)    System.out.println("SUCCESS");
-            else                System.out.println("FAILURE");
+    /*- private -*/
+    private boolean bulkIndexByBatch(int batchNumber) {
+        List<Product> productList = repo.batch(batchNumber);
+        this.bulkIndex(productList);
+        return productList.size() == BATCH_SIZE;
+    }
 
+    private void bulkIndex(List<Product> productList) {
+        BulkRequest bulkRequest = new BulkRequest();
+        productList.forEach(product -> bulkRequest.add(new IndexRequest(PRODUCT_INDEX).id(product.getEan()).source(Product.createJsonSourceFromProduct(product))));
+        try {
+            BulkResponse bulkResponse = esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+            bulkResponse.forEach(BulkItemResponse::getFailureMessage);
+        } catch (IOException e) {
+            throw new BulkRequestFailedException(e);
+        }
+    }
+
+    private boolean isIndexed(String ean) {
+        GetRequest getRequest = new GetRequest(PRODUCT_INDEX, ean);
+        try {
+            return esClient.exists(getRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
             throw new EsResponseCannotBeFetchedException(e);
         }
     }
 
-    /*- private -*/
-    private void bulkAll() {
-        BulkRequest bulkRequest = new BulkRequest();
-        List<Product> productList = repo.getAllProductsAsList();
-
-        int count = 0;
-        for(Product currentProduct : productList) {
-            System.out.println("current product =");
-            System.out.println(currentProduct.toString());
-            System.out.println(count++);
-            if(isIndexed(currentProduct.getEan()))  bulkRequest.add(new UpdateRequest(PRODUCT_INDEX, currentProduct.getEan()).doc(Product.createJsonSourceFromProduct(currentProduct)));
-            else                                    bulkRequest.add(new IndexRequest(PRODUCT_INDEX).id(currentProduct.getEan()).source(Product.createJsonSourceFromProduct(currentProduct)));
-        }
-
+    private boolean indexExists() {
+        GetIndexRequest getIndexRequest = new GetIndexRequest(PRODUCT_INDEX);
         try {
-            esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
+            return esClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            throw new BulkRequestFailedException(e);
+            throw new EsResponseCannotBeFetchedException(e);
         }
-    }
-
-    private boolean bulkByBatch(int batchNumber) {
-        BulkRequest bulkRequest = new BulkRequest();
-        List<Product> productList = repo.batch(batchNumber);
-
-        //int count = 0;
-        for(Product currentProduct : productList) {
-            /*System.out.println("current product =");
-            System.out.println(currentProduct.toString());
-            System.out.println(count++);*/
-            if(isIndexed(currentProduct.getEan()))  bulkRequest.add(new UpdateRequest(PRODUCT_INDEX, currentProduct.getEan()).doc(Product.createJsonSourceFromProduct(currentProduct)));
-            else                                    bulkRequest.add(new IndexRequest(PRODUCT_INDEX).id(currentProduct.getEan()).source(Json.toJson(currentProduct)));
-        }
-
-        try {
-            esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            throw new BulkRequestFailedException(e);
-        }
-        /*System.out.println("keep indexing after batch "+batchNumber+"?");
-        System.out.println(productList.size() == 100);*/
-        return productList.size() == 100;
     }
 
 }

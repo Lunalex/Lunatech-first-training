@@ -25,13 +25,13 @@ public class ProductRepository {
 
     public List<Product> getAllProductsAsList() {
         return ebeanServer.find(Product.class)
-                .order("name")
+                .order("ean")
                 .findList();
     }
 
     public List<Product> batch(int batchNumber) {
         return ebeanServer.find(Product.class)
-                .order("name")
+                .order("ean")
                 .setFirstRow(batchNumber * BATCH_SIZE)
                 .setMaxRows(BATCH_SIZE)
                 .findList();
@@ -39,7 +39,7 @@ public class ProductRepository {
 
     public PagedList<Product> page (int pageIndex) {
         return ebeanServer.find(Product.class)
-                .order("name")
+                .order("ean")
                 .setFirstRow(pageIndex * PAGE_SIZE)
                 .setMaxRows(PAGE_SIZE)
                 .findPagedList();

@@ -44,8 +44,7 @@ public class EsController {
         if(!maybeProduct.isPresent())   return notFound(views.html.notFound404.render());
         Product product = maybeProduct.get();
 
-        if(esService.isIndexed(ean))   esService.reIndexProduct(product);
-        else                           esService.indexProduct(product);
+        esService.indexProduct(maybeProduct.get());
 
         if(isNewProduct)   return redirect(routes.ProductController.showProductsDefault()).flashing("productCreated", product.toString());
         else               return redirect(routes.ProductController.showProductsDefault()).flashing("productEdited", product.toString());
@@ -56,19 +55,14 @@ public class EsController {
         return redirect(routes.ProductController.showProductsDefault());
     }
 
-    public Result areAllProductsIndexed() {
-        esService.checkAllProductsFromDbAreIndexed();
-        return redirect(routes.HomeController.index());
-    }
-
     /*- Delete -*/
     public Result deleteProduct(String ean, String productString) {
-        if(esService.isIndexed(ean))    esService.deleteProduct(ean);
+        esService.deleteProduct(ean);
         return redirect(routes.ProductController.showProductsDefault()).flashing("productDeleted", productString);
     }
 
     public Result deleteAllProducts() {
-        if(esService.indexExists("product"))    esService.deleteAll();
+        esService.deleteAll();
         return redirect(routes.EsController.showEsPageDefault());
     }
 

@@ -1,5 +1,6 @@
 package services;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Product;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -33,11 +34,13 @@ public class EsService {
 
     private final RestHighLevelClient esClient;
     private final ProductRepository repo;
+    private final JsonService jsonService;
     private static final String PRODUCT_INDEX = "product";
 
     @Inject
-    public EsService(ProductRepository repo) {
+    public EsService(ProductRepository repo, JsonService jsonService) {
         this.repo = repo;
+        this.jsonService = jsonService;
         this.esClient = new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
         // TODO: need to investigate when it could be interesting to close the esClient
     }
@@ -91,6 +94,11 @@ public class EsService {
         }
 
         return searchResults;
+    }
+
+    public JsonNode getSearchResultAsJson(String search) {
+        List<Product> productList = this.searchProducts(search);
+        return jsonService.serializeArrayToJson(productList);
     }
 
     /*- Indexing -*/

@@ -45,7 +45,7 @@
             @form(action = routes.EsController.search(), Symbol("class") -> "form-inline col-12 row justify-content-center") {
                 @CSRF.formField
                 @inputText(esForm("search"),
-                    Symbol("_class") -> "form-group col-8", Symbol("class") -> "form-control es-form-search",
+                    Symbol("_class") -> "form-group col-8 row", Symbol("class") -> "form-control es-form-search col-12",
                     Symbol("_label") -> null,
                     Symbol("_showErrors") -> false,
                     Symbol("placeholder") -> "type your search here..."
@@ -106,9 +106,9 @@
             @*-- TYPEAHEAD SEARCH BAR --*@
             <div class="row justify-content-around mt-5 mb-3">
                 <form class="form-inline col-12 row justify-content-center">
-                    <div class="form-group col-8">
-                        <input type="text" id="inputTypeahead" class="form-control es-form-search" placeholder="type to see suggestions..."/>
-                    </div>
+                        <span class="form-group col-8 row twitter-typeahead">
+                            <input type="text" id="inputTypeahead" class="form-control es-form-search col-12 typeahead" placeholder="type to see suggestions..."/>
+                        </span>
                     <button id="buttonTypeahead" type="submit" class="form-control col-2 ml-3 btn btn-light btn-shadow">TASearch</button>
                 </form>
             </div>

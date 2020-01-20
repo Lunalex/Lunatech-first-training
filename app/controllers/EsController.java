@@ -1,10 +1,12 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import models.Product;
 import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Http;
 import play.mvc.Result;
+import scala.util.parsing.json.JSONArray$;
 import services.EsService;
 import services.ProductRepository;
 
@@ -32,10 +34,15 @@ public class EsController {
         return ok(views.html.elasticsearch.render(formFactory.form(String.class), new ArrayList<>(), request));
     }
 
+    /*- Search -*/
     public Result search(String search, Http.Request request) {
         Form<String> esForm = formFactory.form(String.class).bindFromRequest(request);
         List<Product> esProductsFinal = esService.searchProducts(search);
         return ok(views.html.elasticsearch.render(esForm, esProductsFinal, request));
+    }
+
+    public Result searchForTypeahead(String search) {
+        return ok(esService.getSearchResultAsJson(search));
     }
 
     /*- Indexing -*/

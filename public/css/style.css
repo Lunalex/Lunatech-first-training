@@ -203,7 +203,8 @@ footer{
 /*-- Elasticsearch --*/
 
 .form-control.es-form-search {
-    width: 345%;
+    width: 100%;
+    max-width: 345%;
 }
 
 .form-control.es-form-ean {
@@ -219,9 +220,12 @@ footer{
     cursor: pointer;
 }
 
-
-
 .esErrors {
     font-size: 14px;
     color:lightgoldenrodyellow;
+}
+
+/*-- Typeahead --*/
+.tt-hint {
+    color: #999;
 }

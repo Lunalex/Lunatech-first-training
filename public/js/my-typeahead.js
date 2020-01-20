@@ -2,54 +2,54 @@
 * DEFINING HERE HOW TYPEAHEAD MAKE REQUESTS TO ELASTICSEARCH TO AUTOCOMPLETE SEARCHES
 */
 
-var substringMatcher = function(datasetStrings) {
-
-    return function findMatches(query, cb) {
-        var matches = [];                                      // this array will be populated with the substrings matching our request
-        var substringRegex = new RegExp(query, 'i');    // regex used to determine whether a string contains the substring 'query'
-                                                             //  the flag 'i' enable 'ignoreCase' when comparing using the regex
-
-        $.each(datasetStrings, function(i, datasetString){     // here 'i' might be for 'index', a variable not used here anyway
-            if(substringRegex.test(datasetString)){                     // if the query typed match the current evaluated string from the dataset then it's added to the matches array
-                matches.push(datasetString);
-            }
-        });
-        cb(matches);
-    };
-
-};
-
-var searchResult = new Bloodhound({
-    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('ean','name','description'),
+var searchResultsName = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
     queryTokenizer: Bloodhound.tokenizers.whitespace,
-    // identify: function(product) { return product; },
+    // identify: function(product) { return product.name; },
     remote: {
-        url: '../es/typeahead/%QUERY',
-        wildcard: '%QUERY'
+        url: '../es/typeahead/name/%SEARCH',
+        wildcard: '%SEARCH'
     }
-    /*local: ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-        'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-        'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-        'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-        'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-        'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-        'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-        'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-        'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-    ]*/
+});
+
+var searchResultsDescription = new Bloodhound({
+    datumTokenizer: Bloodhound.tokenizers.obj.whitespace('description'),
+    queryTokenizer: Bloodhound.tokenizers.whitespace,
+    // identify: function(product) { return product.name + " | " + product.description; },
+    remote: {
+        url: '../es/typeahead/des/%SEARCH',
+        wildcard: '%SEARCH'
+    }
 });
 
 
-
-
-$('#inputTypeahead').typeahead({
-    hint: true,
-    highlight: true,
-    minLength: 1
-},
-{
-    name: 'elasticsearch-query',
-    // limit: 6,
-    display: 'name',
-    source: searchResult
-});
+$('#inputTypeahead').typeahead(
+    {
+        hint: true,
+        highlight: true,
+        minLength: 0
+    },
+    {
+        name: 'elasticsearch-name-query',
+        display: 'name',
+        source: searchResultsName,
+        templates: {
+            header: '<div class="product-field">in \"name\"</div>'
+        },
+        limit: 10
+        /*
+        IMPORTANT : 'limit' is placed here because of a bug in Typeahead when setting a limit below 4.
+        Correcting it needs me to set its value to 3-4 more than what I need.
+        see for more: https://stackoverflow.com/questions/30213747/typeahead-js-bloodhound-minlength-not-working/30330790#30330790
+        */
+    },
+    {
+        name: 'elasticsearch-description-query',
+        display: 'description',
+        source: searchResultsDescription,
+        templates: {
+            header: '<div class="product-field">in \"description\"</div>'
+        },
+        limit: 10
+    }
+);

@@ -1,14 +1,13 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import models.Product;
 import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Http;
 import play.mvc.Result;
-import scala.util.parsing.json.JSONArray$;
 import services.EsService;
 import services.ProductRepository;
+import services.custom.enums.EsCustomQueryType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -37,12 +36,16 @@ public class EsController {
     /*- Search -*/
     public Result search(String search, Http.Request request) {
         Form<String> esForm = formFactory.form(String.class).bindFromRequest(request);
-        List<Product> esProductsFinal = esService.searchProducts(search);
+        List<Product> esProductsFinal = esService.searchProducts(search, EsCustomQueryType.REGULAR_QUERY);
         return ok(views.html.elasticsearch.render(esForm, esProductsFinal, request));
     }
 
-    public Result searchForTypeahead(String search) {
-        return ok(esService.getSearchResultAsJson(search));
+    public Result searchForTypeaheadName(String search) {
+        return ok(esService.getSearchResultAsJsonForTypeahead(search, EsCustomQueryType.TYPEAHEAD_QUERY_NAME));
+    }
+
+    public Result searchForTypeaheadDescription(String search) {
+        return ok(esService.getSearchResultAsJsonForTypeahead(search, EsCustomQueryType.TYPEAHEAD_QUERY_DESCRIPTION));
     }
 
     /*- Indexing -*/

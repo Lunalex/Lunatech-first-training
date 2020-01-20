@@ -17,16 +17,18 @@ import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.Fuzziness;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import services.custom.enums.EsCustomQueryType;
 import services.custom.exceptions.elasticsearch.BulkRequestFailedException;
 import services.custom.exceptions.elasticsearch.EsResponseCannotBeFetchedException;
 
 import javax.inject.Inject;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static services.ProductRepository.BATCH_SIZE;
 
@@ -45,39 +47,25 @@ public class EsService {
         // TODO: need to investigate when it could be interesting to close the esClient
     }
 
-    public List<Product> searchProducts(String search) {
+    public List<Product> searchProducts(String search, EsCustomQueryType esCustomQueryType) {
         // request
         SearchRequest searchRequest = new SearchRequest(PRODUCT_INDEX);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder()
-                .should(
-                       QueryBuilders.matchQuery("ean", search)
-                               .prefixLength(8)
-                               .fuzziness(Fuzziness.ZERO)
-                               .boost(8)
-                )
-                .should(
-                        QueryBuilders.matchQuery("name", search)
-                                .fuzziness(Fuzziness.AUTO)
-                                .boost(6)
-                )
-                .should(
-                        QueryBuilders.matchPhrasePrefixQuery("description", search)
-                                .slop(0)
-                                .boost(4)
-                )
-                .should(
-                        QueryBuilders.matchPhrasePrefixQuery("description", search)
-                                .slop(1)
-                                .boost(2)
-                )
-                .should(
-                        QueryBuilders.matchQuery("description", search)
-                                .operator(Operator.AND)
-                                .fuzziness(Fuzziness.AUTO)
-                                .boost(1)
-                );
+        BoolQueryBuilder boolQueryBuilder;
+
+        if(esCustomQueryType == EsCustomQueryType.TYPEAHEAD_QUERY_NAME) {
+            boolQueryBuilder = this.makeTypeaheadNameQueryToElasticsearch(search);
+        }
+        else if(esCustomQueryType == EsCustomQueryType.TYPEAHEAD_QUERY_DESCRIPTION) {
+            boolQueryBuilder = this.makeTypeaheadDescriptionQueryToElasticsearch(search);
+        }
+        else {
+            boolQueryBuilder = this.makeRegularQueryToElasticsearch(search);
+        }
+
         searchSourceBuilder.query(boolQueryBuilder).size(5);
+        searchSourceBuilder.from(0);
+        searchSourceBuilder.timeout(new TimeValue(3, TimeUnit.SECONDS));
         searchRequest.source(searchSourceBuilder);
 
         // response
@@ -96,8 +84,8 @@ public class EsService {
         return searchResults;
     }
 
-    public JsonNode getSearchResultAsJson(String search) {
-        List<Product> productList = this.searchProducts(search);
+    public JsonNode getSearchResultAsJsonForTypeahead(String search, EsCustomQueryType typeaheadQueryType) {
+        List<Product> productList = this.searchProducts(search, typeaheadQueryType);
         return jsonService.serializeArrayToJson(productList);
     }
 
@@ -167,6 +155,86 @@ public class EsService {
     }
 
     /*- private -*/
+    private BoolQueryBuilder makeRegularQueryToElasticsearch(String search) {
+        return new BoolQueryBuilder()
+                .should(
+                        QueryBuilders.matchQuery("ean", search)
+                                .prefixLength(8)
+                                .fuzziness(Fuzziness.ZERO)
+                                .boost(8)
+                )
+                .should(
+                        QueryBuilders.matchQuery("name", search)
+                                .fuzziness(Fuzziness.AUTO)
+                                .boost(6)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("description", search)
+                                .slop(0)
+                                .boost(4)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("description", search)
+                                .slop(1)
+                                .boost(2)
+                )
+                .should(
+                        QueryBuilders.matchQuery("description", search)
+                                .operator(Operator.AND)
+                                .fuzziness(Fuzziness.AUTO)
+                                .boost(1)
+                );
+    }
+
+    private BoolQueryBuilder makeTypeaheadNameQueryToElasticsearch(String search) {
+        return new BoolQueryBuilder()
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("name", search)
+                                .slop(0)
+                                .boost(8)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("name", search)
+                                .slop(1)
+                                .boost(4)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("name", search)
+                                .slop(2)
+                                .boost(2)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("name", search)
+                                .slop(3)
+                                .boost(1)
+                );
+    }
+
+    private BoolQueryBuilder makeTypeaheadDescriptionQueryToElasticsearch(String search) {
+        return new BoolQueryBuilder()
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("description", search)
+                                .slop(0)
+                                .boost(8)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("description", search)
+                                .slop(1)
+                                .boost(5)
+                )
+                .should(
+                        QueryBuilders.matchPhrasePrefixQuery("description", search)
+                                .slop(2)
+                                .boost(3)
+                )
+                .should(
+                        QueryBuilders.matchQuery("description", search)
+                                .operator(Operator.AND)
+                                .fuzziness(Fuzziness.ZERO)
+                                .boost(1)
+                );
+    }
+
     private boolean bulkIndexByBatch(int batchNumber) {
         List<Product> productList = repo.batch(batchNumber);
         this.bulkIndex(productList);

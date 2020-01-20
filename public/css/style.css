@@ -229,3 +229,14 @@ footer{
 .tt-hint {
     color: #999;
 }
+
+.twitter-typeahead .product-field {
+    text-align: center;
+    font-size: 17px;
+    font-weight: bold;
+    font-style: italic;
+    margin: 0 20px 5px 20px;
+    padding: 3px 0;
+    border-bottom: 1px solid #ccc;
+    cursor: default;
+}

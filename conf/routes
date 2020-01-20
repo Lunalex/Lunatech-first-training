@@ -45,7 +45,8 @@ GET     /api/fetch/light-indirect       controllers.ApiController.getLightProduc
 
 #Elasticsearch
 GET     /es                             controllers.EsController.showEsPageDefault(request: Request)
-GET     /es/typeahead/:search           controllers.EsController.searchForTypeahead(search: String)
+GET     /es/typeahead/name/:search      controllers.EsController.searchForTypeaheadName(search: String)
+GET     /es/typeahead/des/:search       controllers.EsController.searchForTypeaheadDescription(search: String)
 GET     /es/search                      controllers.EsController.search(search: String ?="", request: Request)
 POST    /es/index/:ean                  controllers.EsController.indexProduct(ean: String, isNewProduct: Boolean)
 POST    /es/index/:ean/delete           controllers.EsController.deleteProduct(ean: String, productString: String)

@@ -23,7 +23,7 @@ var searchResultsDescription = new Bloodhound({
 });
 
 
-$('#inputTypeahead').typeahead(
+$('#search').typeahead(
     {
         hint: true,
         highlight: true,
@@ -36,7 +36,7 @@ $('#inputTypeahead').typeahead(
         templates: {
             header: '<div class="product-field">in \"name\"</div>'
         },
-        limit: 10
+        limit: 10 // limit => max number of products to display in the suggestion list
         /*
         IMPORTANT : 'limit' is placed here because of a bug in Typeahead when setting a limit below 4.
         Correcting it needs me to set its value to 3-4 more than what I need.

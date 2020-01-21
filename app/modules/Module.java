@@ -9,6 +9,7 @@ public class Module extends AbstractModule {
     protected void configure() {
         System.out.println("start");
         bind(TaskIndexing.class).asEagerSingleton();
+        System.out.println("end");
     }
 
 }

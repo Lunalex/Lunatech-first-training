@@ -43,15 +43,15 @@
             @*-- SEARCH BAR --*@
             <div class="row justify-content-around mt-5 mb-3">
             @form(action = routes.EsController.search(), Symbol("class") -> "form-inline col-12 row justify-content-center") {
-                @CSRF.formField
                 @inputText(esForm("search"),
-                    Symbol("_class") -> "form-group col-8 row", Symbol("class") -> "form-control es-form-search col-12",
+                    Symbol("_class") -> "form-group col-8 row typeaheadInputField", Symbol("class") -> "form-control es-form-search col-12 typeahead",
                     Symbol("_label") -> null,
                     Symbol("_showErrors") -> false,
-                    Symbol("placeholder") -> "type your search here..."
+                    Symbol("placeholder") -> "search a product..."
                 )
-                <button id="searchByNameAndEditPictureBtn" type="submit" class="col-2 ml-3 btn btn-light btn-shadow btn-scala-form">
-                    search</button>
+                <div class="form-group col-3 ml-3">
+                    <button id="buttonTypeahead" type="submit" class="btn btn-block btn-light btn-shadow">search</button>
+                </div>
             }
             </div>
 
@@ -100,35 +100,18 @@
             </div>
         </div>
 
-        @*-- TYPEAHEAD --*@
-        <div class="col-11 admin-background my-5">
-
-            @*-- TYPEAHEAD SEARCH BAR --*@
-            <div class="row justify-content-around mt-5 mb-3">
-                <form class="form-inline col-12 row justify-content-center">
-                        <span class="form-group col-8 row twitter-typeahead">
-                            <input type="text" id="inputTypeahead" class="form-control es-form-search col-12 typeahead" placeholder="type to see suggestions..."/>
-                        </span>
-                    <button id="buttonTypeahead" type="submit" class="form-control col-2 ml-3 btn btn-light btn-shadow">TASearch</button>
-                </form>
-            </div>
-
-            @*-- TYPEAHEAD SEARCH RESULTS --*@
-            <div class="row justify-content-around mb-5 mt-2"></div>
-        </div>
-
         @*-- INDEXING BAR --*@
         <div class="col-11 admin-background bottom-bar my-5">
-            <div class="row justify-content-around my-3">
-                <div class="col-4 my-3">
+            <div class="row justify-content-around my-1">
+                <div class="col-4 my-2">
                 @form(action = routes.EsController.indexAllProducts()) {
                     @CSRF.formField
-                    <button type="submit" class="btn btn-block btn-warning py-2">INDEX ALL PRODUCTS</button>
+                    <button type="submit" class="btn btn-block btn-warning py-1">INDEX ALL</button>
                 }
                 </div>
-                <div class="col-4 my-3">
-                    <a class="btn btn-block btn-danger py-2" data-toggle="modal" data-target="#index-delete-modal">
-                        DELETE ALL PRODUCTS</a>
+                <div class="col-4 my-2">
+                    <a class="btn btn-block btn-danger py-1" data-toggle="modal" data-target="#index-delete-modal">
+                        DELETE ALL</a>
                 </div>
             </div>
         </div>

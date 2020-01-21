@@ -119,7 +119,7 @@ public class EsService {
             keepIndexing = this.bulkIndexByBatch(batchNumber);
             batchNumber++;
         }
-        System.out.printf("indexation done with %s%n batch", batchNumber);
+        System.out.printf("indexation done with %s batch", batchNumber);
     }
 
     /*- Delete -*/

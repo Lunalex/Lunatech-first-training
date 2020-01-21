@@ -5,17 +5,19 @@ import com.google.inject.Singleton;
 import services.EsService;
 
 @Singleton
-public class TaskIndexing implements Runnable {
+public class TaskIndexing {
 
     private final EsService esService;
 
     @Inject
     public TaskIndexing(EsService esService) {
         this.esService = esService;
+        System.out.println("TaskIndexing: 'constr'");
+        this.initialize();
     }
 
-    @Override
-    public void run() {
+    public void initialize() {
+        System.out.println("TaskIndexing: 'run'");
         esService.indexAll();
     }
 }

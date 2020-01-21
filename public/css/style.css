@@ -240,3 +240,8 @@ footer{
     border-bottom: 1px solid #ccc;
     cursor: default;
 }
+
+.typeaheadInputField dd {
+    width: 100%;
+    margin-bottom: 0;
+}

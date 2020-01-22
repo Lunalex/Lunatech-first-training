@@ -4,15 +4,10 @@ import actors.ActorFilterProductsProtocol.*;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
-import controllers.routes;
 import models.Product;
-import play.Logger;
-import services.ProductRepository;
+import services.product.ProductRepository;
 
 import java.util.List;
-
-import static play.mvc.Results.ok;
-import static play.mvc.Results.redirect;
 
 public class ActorFilterProducts extends AbstractActor {
 
@@ -44,15 +39,8 @@ public class ActorFilterProducts extends AbstractActor {
                         })
                 .match(
                         filterProductsByName.class,
-                        filterProducts -> {
-                            List<Product> productsFiltered = repo.searchByName(filterProducts.getExactName());
-
-                            // below: the redirect is read without error but it did not redirect anywhere as the Receive seems to only send BACK data via ASK or return VOID
-                            // thus I cannot have my page loaded with the correct PictureUpdateAnswerMessage
-                            // TODO: conclusion = investigate how to return a RESULT in an actor
-                            redirect(routes.AdminController.filterProductsByName(filterProducts.getExactName()));
-//                            ok(views.html.listProductsFiltered.render(productsFiltered, filterProducts.getAnswerMessage()));
-                        })
+                        filterProducts -> repo.searchByName(filterProducts.getExactName())
+                )
                 .build();
     }
 

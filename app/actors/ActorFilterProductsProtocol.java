@@ -18,19 +18,13 @@ public class ActorFilterProductsProtocol {
     public static class filterProductsByName {
 
         private final String exactName;
-        private final PictureUpdateAnswerMessage answerMessage;
 
-        public filterProductsByName(String exactName, PictureUpdateAnswerMessage answerMessage) {
+        public filterProductsByName(String exactName) {
             this.exactName = exactName;
-            this.answerMessage = answerMessage;
         }
 
         public String getExactName() {
             return exactName;
-        }
-
-        public PictureUpdateAnswerMessage getAnswerMessage() {
-            return answerMessage;
         }
     }
 

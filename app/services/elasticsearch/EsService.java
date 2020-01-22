@@ -1,4 +1,4 @@
-package services;
+package services.elasticsearch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import models.Product;
@@ -23,28 +23,27 @@ import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import play.libs.Json;
-import services.custom.enums.EsCustomQueryType;
-import services.custom.exceptions.elasticsearch.BulkRequestFailedException;
-import services.custom.exceptions.elasticsearch.EsResponseCannotBeFetchedException;
+import services.product.ProductRepository;
+import services.elasticsearch.enums.EsCustomQueryType;
+import services.elasticsearch.exceptions.BulkRequestFailedException;
+import services.elasticsearch.exceptions.EsResponseCannotBeFetchedException;
 
 import javax.inject.Inject;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static services.ProductRepository.BATCH_SIZE;
+import static services.product.ProductRepository.BATCH_SIZE;
 
 public class EsService {
 
     private final RestHighLevelClient esClient;
     private final ProductRepository repo;
-    private final JsonService jsonService;
     private static final String PRODUCT_INDEX = "product";
 
     @Inject
-    public EsService(ProductRepository repo, JsonService jsonService) {
+    public EsService(ProductRepository repo) {
         this.repo = repo;
-        this.jsonService = jsonService;
         this.esClient = new RestHighLevelClient(
                 RestClient.builder(new HttpHost("localhost", 9200, "http"))
         );
@@ -87,7 +86,7 @@ public class EsService {
 
     public JsonNode getSearchResultAsJsonForTypeahead(String search, EsCustomQueryType typeaheadQueryType) {
         List<Product> productList = this.searchProducts(search, typeaheadQueryType);
-        return jsonService.serializeArrayToJson(productList);
+        return Json.toJson(productList);
     }
 
     /*- Indexing -*/

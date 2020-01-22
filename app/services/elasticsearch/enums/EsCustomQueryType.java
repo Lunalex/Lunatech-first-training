@@ -1,4 +1,4 @@
-package services.custom.enums;
+package services.elasticsearch.enums;
 
 public enum EsCustomQueryType {
     REGULAR_QUERY,

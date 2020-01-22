@@ -6,29 +6,31 @@ import models.Product;
 import play.mvc.Controller;
 import play.mvc.Result;
 import services.ApiService;
-import services.JsonService;
 
 import javax.inject.Inject;
 import java.util.List;
 
+import static services.product.ProductRepository.PAGE_SIZE;
+
 public class ApiController extends Controller {
 
     private final ApiService apiService;
-    private final JsonService jsonService;
 
     @Inject
-    public ApiController(ApiService apiService, JsonService jsonService) {
+    public ApiController(ApiService apiService) {
         this.apiService = apiService;
-        this.jsonService = jsonService;
     }
 
     public Result showProductsApi(int pageIndex) {
         JsonNode jsonFetched = apiService.getJson().deepCopy();
-        return jsonService.showProductsJson(jsonFetched, pageIndex);
+        if (jsonFetched == null) return notFound(views.html.notFound404.render());
+        List<Product> productListFromJson = apiService.deserializeJsonToListAsPage(jsonFetched, pageIndex, PAGE_SIZE);
+        int totalNumberOfPages = apiService.findTotalNumberOfPages(apiService.findNumberOfProductsFromJson(jsonFetched));
+        return ok(views.html.showProductsApi.render(productListFromJson, pageIndex, totalNumberOfPages));
     }
 
     public Result getLightProductsApi() {
-        JsonNode jsonFetched = this.apiService.getJson().deepCopy();
+        JsonNode jsonFetched = apiService.getJson().deepCopy();
         if (jsonFetched == null) return notFound(views.html.notFound404.render());
         for (JsonNode jsonProductNode : jsonFetched) {
             if (jsonProductNode.has("picture")) ((ObjectNode) jsonProductNode).remove("picture");
@@ -37,17 +39,9 @@ public class ApiController extends Controller {
     }
 
     public Result getFullProductsApi() {
-        JsonNode json = this.apiService.getJson().deepCopy();
+        JsonNode json = apiService.getJson().deepCopy();
         if (json == null) return notFound(views.html.notFound404.render());
         return ok(json);
-    }
-
-    public Result getLightProductsApiIndirectMethod() {
-        JsonNode json = this.apiService.getJson().deepCopy();
-        if (json == null) return notFound(views.html.notFound404.render());
-        List<Product> lightList = this.jsonService.deserializeJsonToListAsFull(json);
-        JsonNode lightJson = this.jsonService.serializeArrayToJson(lightList);
-        return ok(lightJson);
     }
 
 }

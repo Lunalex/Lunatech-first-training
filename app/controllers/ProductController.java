@@ -14,7 +14,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import services.ProductRepository;
+import services.product.ProductRepository;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -64,8 +64,6 @@ public class ProductController extends Controller {
     }
 
     public Result showProductImage(String ean) {
-        // map s'utilise sur une Liste d'Optional (ou Optional seul) et va retourner une List du type determiné
-        // le else s'exécutera si la liste retournée est vide
         return repo.findByEan(ean)
                 .map(product -> (
                         product.getPicture() != null ? ok(product.getPicture()) : notFound(environment.getFile("public/images/product-default.png"))
@@ -145,7 +143,6 @@ public class ProductController extends Controller {
     }
 
     /* -- API-RELATED -- */
-
     public Result generateProductsApiURL() {
         List<Product> myProducts = repo.getAllProductsAsList();
         JsonNode productsJson = Json.toJson(myProducts);
@@ -153,7 +150,6 @@ public class ProductController extends Controller {
     }
 
     /* -- PRIVATE -- */
-
     private void setupPicture(Http.Request request, Product newProduct) {
         Http.MultipartFormData<TemporaryFile> formData = request.body().asMultipartFormData();
         Http.MultipartFormData.FilePart<TemporaryFile> picture = formData.getFile("pictureFile");

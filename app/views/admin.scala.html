@@ -1,4 +1,3 @@
-@import actors.PictureUpdateAnswerMessage
 @(adminForm: play.data.Form[Product], request: Http.Request)
 @import helper._
 
@@ -10,44 +9,50 @@
             <a class="btn btn-outline-primary btn-shadow" href="@routes.HomeController.index()">Back to index</a>
         </div>
     </div>
-    <br>
-    <div class="row justify-content-center">
-        <div class="col-11 admin-background">
-            <br>
-            <br>
-            <br>
-            <div class="row justify-content-center mt-2">
+    <div class="row justify-content-center py-5">
+        <div class="col-11 admin-background py-5">
+
+            @* Toph image *@
+            <div class="row justify-content-center mt-2 py-5">
                 <div class="col-5 toph">
                     <img src="@routes.Assets.versioned("images/Toph.png")" class="toph-image"/>
                     <div class="toph-text">Hello!</div>
                 </div>
             </div>
+
+            @* say "hello Toph" using actor *@
             <div class="row justify-content-center mt-2">
                 <div class="col-4">
                     <a href="@routes.AdminController.sayHello()" class="btn btn-block btn-dark btn-shadow" style="color: yellow;">
                         Say hello to Toph</a>
                 </div>
             </div>
+
             <div class="row justify-content-around mt-5">
+
+                @* Load all products (no actor) *@
                 @form(action = routes.AdminController.loadProductsFromCsv(), Symbol("class") -> "col-4") {
                     @CSRF.formField
                     <button type="submit" class="btn btn-block btn-info btn-shadow">Load all products (no actor)</button>
                 }
+
+                @* Load all products (with actor) *@
                 @form(action = routes.AdminController.loadProductsFromCsvActor(), Symbol("class") -> "col-4") {
                     @CSRF.formField
                     <button type="submit" class="btn btn-block btn-success btn-shadow">Load all products (with actor)</button>
                 }
             </div>
+
+            @* flush all products *@
             <div class="row justify-content-around mt-5">
             @form(action = routes.AdminController.flushAllProducts(), Symbol("class") -> "col-4") {
                 @CSRF.formField
                 <button type="submit" class="btn btn-block btn-warning btn-shadow">Flush all products</button>
             }
             </div>
-            <br>
-            <br>
-            <br>
-            <div class="row justify-content-around mt-2">
+
+            @* search by description *@
+            <div class="row justify-content-around mt-5">
             @form(action = routes.AdminController.filterProductsByDescription(), Symbol("class") -> "form-inline col-12 row justify-content-start") {
                 <button type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Search by description</button>
                 <div class="form-group col-8">
@@ -55,6 +60,8 @@
                 </div>
                 }
             </div>
+
+            @* search by name *@
             <div class="row justify-content-around mt-2">
             @form(action = routes.AdminController.filterProductsByName(), Symbol("class") -> "form-inline col-12 row justify-content-start") {
                 <button type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Search by name</button>
@@ -63,16 +70,18 @@
                 </div>
             }
             </div>
+
+            @* add new picture to same name *@
             <div class="row justify-content-around mt-4">
             @form(action = routes.AdminController.filterProductsByNameAndSetupPicture(),
                 Symbol("class") -> "form-inline col-12 row justify-content-around",
                 Symbol("enctype") -> "multipart/form-data") {
                 @CSRF.formField
-                <button id="searchByNameAndEditPictureBtn" type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Search by name</button>
+                <button id="searchByNameAndEditPictureBtn" type="submit" class="col-4 btn btn-light btn-shadow btn-scala-form">Add new picture to same name</button>
                 @inputText(adminForm("name"),
                     Symbol("_class") -> "form-group col-4",
                     Symbol("class") -> "form-control admin-form-name",
-                    Symbol("placeholder") -> "Enter product name...",
+                    Symbol("placeholder") -> "Enter products name...",
                     Symbol("_label") -> null
                 )
                 @inputFile(adminForm("pictureFile"),
@@ -80,17 +89,9 @@
                     Symbol("class") -> "form-control admin-form-picture",
                     Symbol("_label") -> null
                 )
-                <div class="col-12 row justify-content-end">
-                    <label class="col-5 admin-label" for="searchByNameAndEditPictureBtn">Optional: choose a picture to edit products</label>
-                </div>
             }
             </div>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
-            <br>
+
         </div>
     </div>
 }

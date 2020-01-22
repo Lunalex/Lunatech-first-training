@@ -2,7 +2,7 @@ package tasks;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import services.EsService;
+import services.elasticsearch.EsService;
 
 @Singleton
 public class TaskIndexing {

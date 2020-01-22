@@ -1,4 +1,4 @@
-package services.custom.exceptions.elasticsearch;
+package services.elasticsearch.exceptions;
 
 public class EsResponseCannotBeFetchedException extends RuntimeException {
 

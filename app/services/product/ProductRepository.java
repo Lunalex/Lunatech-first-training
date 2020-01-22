@@ -1,4 +1,4 @@
-package services;
+package services.product;
 
 import io.ebean.PagedList;
 import models.Product;

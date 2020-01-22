@@ -5,9 +5,9 @@ import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.Http;
 import play.mvc.Result;
-import services.EsService;
-import services.ProductRepository;
-import services.custom.enums.EsCustomQueryType;
+import services.elasticsearch.EsService;
+import services.product.ProductRepository;
+import services.elasticsearch.enums.EsCustomQueryType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

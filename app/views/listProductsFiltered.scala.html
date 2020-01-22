@@ -1,8 +1,4 @@
-@(products: java.util.List[models.Product], pictureUpdate: actors.PictureUpdateAnswerMessage)
-@import actors.PictureUpdateAnswerMessage;
-@import actors.PictureUpdateAnswerMessage.NO_NEW_PICTURE;
-@import actors.PictureUpdateAnswerMessage.PICTURE_UPDATED;
-@import actors.PictureUpdateAnswerMessage.PICTURE_NOT_UPDATED;
+@(products: java.util.List[models.Product])
 
 @main("Products filtered") {
 
@@ -22,16 +18,6 @@
             <div class="row justify-content-around card-body">
                 @if(products.isEmpty) {
                     <div class="col-10 alert alert-info mt-3">Sorry no product corresponding to your request has been found</div>
-                } else {
-                    @if(pictureUpdate.equals(PICTURE_UPDATED)) {
-                        <div class="col-10 alert alert-success mt-5"><b>SUCCESS:</b> all pictures have been updated</div>
-                    }
-                    @if(pictureUpdate.equals(PICTURE_NOT_UPDATED)) {
-                        <div class="col-10 alert alert-danger mt-5"><b>ERROR:</b> image file max size = 880Ko</div>
-                    }
-                    @if(pictureUpdate.equals(NO_NEW_PICTURE)) {
-                        <div class="col-10 alert alert-warning mt-5"><b>ERROR:</b> no image file was attached to your request</div>
-                    }
                 }
 
                 @for(p <- products) {

@@ -10,9 +10,9 @@ GET     /assets/*file                   controllers.Assets.versioned(path="/publ
 
 # Admin
 GET     /admin                          controllers.AdminController.showAdmin(request: Request)
-POST    /admin/flush-all-products       controllers.AdminController.flushAllProducts(request: Request)
-POST    /admin/load-products            controllers.AdminController.loadProductsFromCsv(request: Request)
-POST    /admin/load-products-actor      controllers.AdminController.loadProductsFromCsvActor(request: Request)
+POST    /admin/flush-all-products       controllers.AdminController.flushAllProducts
+POST    /admin/load-products            controllers.AdminController.loadProductsFromCsv
+POST    /admin/load-products-actor      controllers.AdminController.loadProductsFromCsvActor
 GET     /admin/search/description       controllers.AdminController.filterProductsByDescription(search:String ?= "")
 GET     /admin/search/name              controllers.AdminController.filterProductsByName(search:String ?= "")
 POST    /admin/setup-picture            controllers.AdminController.filterProductsByNameAndSetupPicture(request: Request)
@@ -41,7 +41,6 @@ GET     /api                            controllers.ProductController.generatePr
 GET     /api/products/page/:pageIndex   controllers.ApiController.showProductsApi(pageIndex: Int)
 GET     /api/fetch/raw                  controllers.ApiController.getFullProductsApi
 GET     /api/fetch/light                controllers.ApiController.getLightProductsApi
-GET     /api/fetch/light-indirect       controllers.ApiController.getLightProductsApiIndirectMethod
 
 #Elasticsearch
 GET     /es                             controllers.EsController.showEsPageDefault(request: Request)

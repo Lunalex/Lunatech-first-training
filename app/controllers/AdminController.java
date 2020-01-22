@@ -117,7 +117,4 @@ public class AdminController extends Controller {
         return redirect(routes.AdminController.filterProductsByName(name));
     }
 
-
-    // --- PRIVATE METHODS ---
-
 }

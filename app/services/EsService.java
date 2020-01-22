@@ -18,9 +18,11 @@ import org.elasticsearch.client.*;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import play.libs.Json;
 import services.custom.enums.EsCustomQueryType;
 import services.custom.exceptions.elasticsearch.BulkRequestFailedException;
 import services.custom.exceptions.elasticsearch.EsResponseCannotBeFetchedException;
@@ -43,8 +45,9 @@ public class EsService {
     public EsService(ProductRepository repo, JsonService jsonService) {
         this.repo = repo;
         this.jsonService = jsonService;
-        this.esClient = new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
-        // TODO: need to investigate when it could be interesting to close the esClient
+        this.esClient = new RestHighLevelClient(
+                RestClient.builder(new HttpHost("localhost", 9200, "http"))
+        );
     }
 
     public List<Product> searchProducts(String search, EsCustomQueryType esCustomQueryType) {
@@ -70,17 +73,15 @@ public class EsService {
 
         // response
         List<Product> searchResults = new ArrayList<>();
-
         if(this.indexExists()) {
             try {
                 SearchResponse searchResponse =  esClient.search(searchRequest, RequestOptions.DEFAULT);
                 SearchHit[] searchHits = searchResponse.getHits().getHits();
-                for(SearchHit hit : searchHits) searchResults.add(Product.createProductFromMap(hit.getSourceAsMap()));
+                for(SearchHit hit : searchHits) searchResults.add(this.toProduct(hit));
             } catch (Exception e) {
                 throw new EsResponseCannotBeFetchedException(e);
             }
         }
-
         return searchResults;
     }
 
@@ -95,11 +96,11 @@ public class EsService {
             // request
             IndexRequest indexRequest = new IndexRequest(PRODUCT_INDEX);
             indexRequest.id(product.getEan());
-            indexRequest.source(Product.createMapFromProduct(product));
+            indexRequest.source(Json.toJson(product).toString(), XContentType.JSON);
 
             // response
             IndexResponse indexResponse = esClient.index(indexRequest, RequestOptions.DEFAULT);
-            ReplicationResponse .ShardInfo shardInfo = indexResponse.getShardInfo();
+            ReplicationResponse.ShardInfo shardInfo = indexResponse.getShardInfo();
 
             System.out.println("indexing product in ES "+ product.getEan() +" = ");
             if(shardInfo.getSuccessful() == 0) System.out.println("FAILURE");
@@ -155,6 +156,15 @@ public class EsService {
     }
 
     /*- private -*/
+    private Product toProduct(SearchHit hit) {
+        Map<String, Object> sourceFetchedFromEs = hit.getSourceAsMap();
+        return new Product(
+                (String) sourceFetchedFromEs.get("ean"),
+                (String) sourceFetchedFromEs.get("name"),
+                (String) sourceFetchedFromEs.getOrDefault("description","")
+        );
+    }
+
     private BoolQueryBuilder makeRegularQueryToElasticsearch(String search) {
         return new BoolQueryBuilder()
                 .should(
@@ -243,7 +253,11 @@ public class EsService {
 
     private void bulkIndex(List<Product> productList) {
         BulkRequest bulkRequest = new BulkRequest();
-        productList.forEach(product -> bulkRequest.add(new IndexRequest(PRODUCT_INDEX).id(product.getEan()).source(Product.createJsonSourceFromProduct(product))));
+        productList.forEach(product -> bulkRequest.add(
+                new IndexRequest(PRODUCT_INDEX)
+                        .id(product.getEan())
+                        .source(Json.toJson(product).toString(),XContentType.JSON)));
+                        //.source(Product.createJsonSourceFromProduct(product))));
         try {
             BulkResponse bulkResponse = esClient.bulk(bulkRequest, RequestOptions.DEFAULT);
             bulkResponse.forEach(BulkItemResponse::getFailureMessage);
@@ -269,5 +283,4 @@ public class EsService {
             throw new EsResponseCannotBeFetchedException(e);
         }
     }
-
 }

@@ -36,7 +36,7 @@ This project uses Elasticsearch (incl. Kibana) in a Docker container.
 
 First install Docker on your machine : https://www.docker.com/
 
-Then in the terminal go to the app in the /elasticsearch folder and type: "docker-compose up"
+Then in the terminal go to the app in the /elasticsearch folder and type: `docker-compose up`
 
 This will launch Elasticsearch on the port localhost:9200 and Kibana on the port localhost:5601
 
